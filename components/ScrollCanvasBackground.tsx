@@ -23,6 +23,8 @@ export default function ScrollCanvasBackground({
   const currentFrameRef = useRef<number>(1);
   const targetFrameRef = useRef<number>(1);
   const animFrameIdRef = useRef<number | null>(null);
+  const lastDrawnFrameRef = useRef(0);
+  const lastDrawTimeRef = useRef(0);
   const [initialFrameLoaded, setInitialFrameLoaded] = useState(false);
 
   // Preload frames progressively
@@ -34,6 +36,7 @@ export default function ScrollCanvasBackground({
     // Load Frame 1 first for immediate render
     const img1 = new Image();
     img1.decoding = "async";
+    img1.fetchPriority = "high";
     img1.onload = () => {
       if (isCancelled) return;
       imagesRef.current[0] = img1;
@@ -73,6 +76,7 @@ export default function ScrollCanvasBackground({
           await new Promise<void>((resolve) => {
             const img = new Image();
             img.decoding = "async";
+            img.fetchPriority = "low";
             img.onload = () => {
               if (!isCancelled) {
                 imagesRef.current[idx - 1] = img;
@@ -86,7 +90,9 @@ export default function ScrollCanvasBackground({
         }
       };
 
-      await Promise.all(Array.from({ length: 3 }, () => loadWorker()));
+      const lowEndDevice = (navigator.hardwareConcurrency || 8) <= 4
+        || ((navigator as Navigator & { deviceMemory?: number }).deviceMemory || 8) <= 4;
+      await Promise.all(Array.from({ length: lowEndDevice ? 1 : 3 }, () => loadWorker()));
     };
 
     return () => {
@@ -168,6 +174,9 @@ export default function ScrollCanvasBackground({
   // Scroll listener & eased drawing loop
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lowEndDevice = (navigator.hardwareConcurrency || 8) <= 4
+      || ((navigator as Navigator & { deviceMemory?: number }).deviceMemory || 8) <= 4;
+    const minDrawInterval = 1000 / (lowEndDevice ? 24 : 30);
 
     const updateTargetFrame = () => {
       const container = scrollContainerRef.current;
@@ -187,7 +196,7 @@ export default function ScrollCanvasBackground({
     };
 
     // RAF Animation Loop with smooth lerp interpolation
-    const loop = () => {
+    const loop = (now: number) => {
       animFrameIdRef.current = null;
       updateTargetFrame();
 
@@ -203,11 +212,23 @@ export default function ScrollCanvasBackground({
         }
       }
 
-      drawFrame(currentFrameRef.current);
-      if (Math.abs(targetFrameRef.current - currentFrameRef.current) > 0.05) {
+      const visibleFrame = Math.round(currentFrameRef.current);
+      if (visibleFrame !== lastDrawnFrameRef.current && now - lastDrawTimeRef.current >= minDrawInterval) {
+        drawFrame(visibleFrame);
+        lastDrawnFrameRef.current = visibleFrame;
+        lastDrawTimeRef.current = now;
+      }
+
+      if (Math.abs(targetFrameRef.current - currentFrameRef.current) > 0.15) {
         animFrameIdRef.current = requestAnimationFrame(loop);
       } else {
         currentFrameRef.current = targetFrameRef.current;
+        const finalFrame = Math.round(currentFrameRef.current);
+        if (finalFrame !== lastDrawnFrameRef.current) {
+          drawFrame(finalFrame);
+          lastDrawnFrameRef.current = finalFrame;
+          lastDrawTimeRef.current = now;
+        }
       }
     };
 
@@ -225,6 +246,8 @@ export default function ScrollCanvasBackground({
     const handleResize = () => {
       updateTargetFrame();
       drawFrame(currentFrameRef.current);
+      lastDrawnFrameRef.current = Math.round(currentFrameRef.current);
+      lastDrawTimeRef.current = performance.now();
       scheduleFrame();
     };
 

@@ -270,7 +270,7 @@ const INITIAL_DISHES: DishItem[] = [
     image: "/images/menu_ajiaco.jpg",
     cook: "Doña Rosa",
     cookId: "dona-rosa",
-    cookAvatar: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+    cookAvatar: "/images/dona_rosa_mascot.jpg",
     rating: "4,9",
     reviews: 120,
     distance: "A 350 m",
@@ -318,7 +318,7 @@ const INITIAL_DISHES: DishItem[] = [
     image: "/images/dish_pollo_chalk.jpg",
     cook: "Doña Marta",
     cookId: "dona-marta",
-    cookAvatar: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+    cookAvatar: "/images/cook_earnings_zero_commission.jpg",
     rating: "4,8",
     reviews: 87,
     distance: "A 800 m",
@@ -342,7 +342,7 @@ const INITIAL_DISHES: DishItem[] = [
     image: "/images/hero_plate_gourmet.jpg",
     cook: "María Elena",
     cookId: "maria-elena",
-    cookAvatar: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+    cookAvatar: "/images/abuelita_3d_mascot.jpg",
     rating: "4,7",
     reviews: 73,
     distance: "A 1,2 km",
@@ -390,7 +390,7 @@ const INITIAL_DISHES: DishItem[] = [
     image: "/images/menu_postre.jpg",
     cook: "Doña Lucía",
     cookId: "dona-lucia",
-    cookAvatar: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+    cookAvatar: "/images/mascota_abuela_cutout.png",
     rating: "4,8",
     reviews: 64,
     distance: "A 900 m",
@@ -437,12 +437,12 @@ const INITIAL_REVIEWS: Review[] = [
 
 // Retratos estables para los seis perfiles de demostración del barrio.
 const DEMO_COOK_AVATARS: Record<string, string> = {
-  "dona-rosa": "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+  "dona-rosa": "/images/dona_rosa_mascot.jpg",
   "don-carlos": "/images/comunidad/vecino_1.jpg",
-  "dona-marta": "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
-  "dona-lucia": "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+  "dona-marta": "/images/cook_earnings_zero_commission.jpg",
+  "dona-lucia": "/images/mascota_abuela_cutout.png",
   "don-luis": "/images/comunidad/vecino_4.jpg",
-  "maria-elena": "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+  "maria-elena": "/images/abuelita_3d_mascot.jpg",
 };
 
 // Helper functions for persistent LocalStorage management

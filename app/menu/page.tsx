@@ -160,7 +160,7 @@ export default function MenuPage() {
       formattedPrice: "$18.000",
       image: "/images/menu_ajiaco.jpg",
       cook: "Doña Rosa",
-      cookAvatar: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+      cookAvatar: "/images/dona_rosa_mascot.jpg",
       rating: "4,9",
       reviews: "120",
       distance: "A 350 m",
@@ -190,7 +190,7 @@ export default function MenuPage() {
       formattedPrice: "$17.000",
       image: "/images/dish_pollo_chalk.jpg",
       cook: "Doña Marta",
-      cookAvatar: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+      cookAvatar: "/images/cook_earnings_zero_commission.jpg",
       rating: "4,8",
       reviews: "87",
       distance: "A 800 m",
@@ -205,7 +205,7 @@ export default function MenuPage() {
       formattedPrice: "$15.000",
       image: "/images/hero_plate_gourmet.jpg",
       cook: "María Elena",
-      cookAvatar: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+      cookAvatar: "/images/abuelita_3d_mascot.jpg",
       rating: "4,7",
       reviews: "73",
       distance: "A 1,2 km",
@@ -235,7 +235,7 @@ export default function MenuPage() {
       formattedPrice: "$6.000",
       image: "/images/menu_postre.jpg",
       cook: "Doña Lucía",
-      cookAvatar: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
+      cookAvatar: "/images/dona_rosa_mascot.jpg",
       rating: "4,8",
       reviews: "64",
       distance: "A 900 m",
@@ -1199,14 +1199,14 @@ export default function MenuPage() {
 
                 <div className="-mx-1 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto px-1 pb-2 scrollbar-none sm:mx-0 sm:gap-2.5 sm:px-0 sm:snap-none">
                   {[
-                    { name: "Doña Rosa", dish: "Ajiaco de la casa", dist: "350 m", rating: "4,9", img: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Doña Rosa", dish: "Ajiaco de la casa", dist: "350 m", rating: "4,9", img: "/images/dona_rosa_mascot.jpg" },
                     { name: "Don Carlos", dish: "Bandeja casera", dist: "600 m", rating: "4,8", img: "/images/comunidad/vecino_1.jpg" },
-                    { name: "Doña Marta", dish: "Pollo guisado", dist: "800 m", rating: "4,8", img: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
-                    { name: "María Elena", dish: "Lentejas estofadas", dist: "1,2 km", rating: "4,7", img: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Doña Marta", dish: "Pollo guisado", dist: "800 m", rating: "4,8", img: "/images/cook_earnings_zero_commission.jpg" },
+                    { name: "María Elena", dish: "Lentejas estofadas", dist: "1,2 km", rating: "4,7", img: "/images/abuelita_3d_mascot.jpg" },
                     { name: "Don Luis", dish: "Sancocho de pollo", dist: "1,1 km", rating: "4,9", img: "/images/comunidad/vecino_4.jpg" },
-                    { name: "Doña Lucía", dish: "Arroz con leche", dist: "900 m", rating: "4,8", img: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
-                    { name: "Doña Carmen", dish: "Tamales tolimenses", dist: "450 m", rating: "4,9", img: "https://images.unsplash.com/photo-1759679124833-83c668839eaa?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
-                    { name: "Don Pedro", dish: "Sudado criollo", dist: "700 m", rating: "4,8", img: "https://images.unsplash.com/photo-1556908153-a685b0352d59?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Doña Lucía", dish: "Arroz con leche", dist: "900 m", rating: "4,8", img: "/images/mascota_abuela_cutout.png" },
+                    { name: "Doña Carmen", dish: "Tamales tolimenses", dist: "450 m", rating: "4,9", img: "/images/abuelita_3d_hq.jpg" },
+                    { name: "Don Pedro", dish: "Sudado criollo", dist: "700 m", rating: "4,8", img: "/images/comunidad/vecino_3.jpg" },
                   ].map((cook, idx) => (
                       <div
                           key={idx}
@@ -1214,7 +1214,7 @@ export default function MenuPage() {
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <img src={cook.img} alt={cook.name} className="w-9 h-9 rounded-full object-cover border border-[#98774e]" />
+                            <img src={cook.img} alt={cook.name} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/images/dona_rosa_mascot.jpg"; }} className="w-9 h-9 rounded-full object-cover border border-[#98774e]" />
                             <span className="text-[10px] bg-[#dce4ce] text-[#52663d] font-bold px-2 py-0.5 rounded-full border border-[#75865a]/50">
                           ★ {cook.rating}
                         </span>

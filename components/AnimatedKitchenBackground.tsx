@@ -15,6 +15,9 @@ export default function AnimatedKitchenBackground() {
     const totalFrames = 150;
     const images: HTMLImageElement[] = new Array(totalFrames);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isLowEndDevice = (navigator.hardwareConcurrency || 8) <= 4
+      || ((navigator as Navigator & { deviceMemory?: number }).deviceMemory || 8) <= 4
+      || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
     let isCancelled = false;
 
     const pad = (n: number) => String(n).padStart(3, "0");
@@ -49,9 +52,11 @@ export default function AnimatedKitchenBackground() {
         }
       };
 
-      await Promise.all(Array.from({ length: 5 }, () => worker()));
+      await Promise.all(Array.from({ length: isLowEndDevice ? 2 : 4 }, () => worker()));
     };
-    void loadFrames();
+    const loadTimer = prefersReducedMotion
+      ? undefined
+      : window.setTimeout(() => void loadFrames(), 350);
 
     const drawCanvasFrame = (img: HTMLImageElement) => {
       if (!canvasRef.current || !img || !img.complete || img.naturalWidth === 0) return;
@@ -59,7 +64,7 @@ export default function AnimatedKitchenBackground() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, isLowEndDevice ? 1.5 : 2);
       const displayWidth = window.innerWidth;
       const displayHeight = window.innerHeight;
 
@@ -97,8 +102,9 @@ export default function AnimatedKitchenBackground() {
 
     let animationFrameId: number;
     let lastTime = performance.now();
-    const fps = 25; // ~25 FPS animation rate
+    const fps = isLowEndDevice ? 18 : 25;
     const frameInterval = 1000 / fps;
+    let frameProgress = 0;
 
     const renderLoop = (now: number) => {
       if (!prefersReducedMotion) {
@@ -106,7 +112,11 @@ export default function AnimatedKitchenBackground() {
         if (elapsed >= frameInterval) {
           lastTime = now - (elapsed % frameInterval);
 
-          frameIndexRef.current = (frameIndexRef.current + 1) % totalFrames;
+          // Keep the same animation duration while drawing fewer frames on low-end devices.
+          frameProgress += elapsed / (1000 / 25);
+          const framesToAdvance = Math.floor(frameProgress);
+          frameProgress -= framesToAdvance;
+          frameIndexRef.current = (frameIndexRef.current + framesToAdvance) % totalFrames;
           const currentImg = imagesRef.current[frameIndexRef.current];
 
           if (currentImg && currentImg.complete && currentImg.naturalWidth > 0) {
@@ -139,6 +149,7 @@ export default function AnimatedKitchenBackground() {
     return () => {
       isCancelled = true;
       cancelAnimationFrame(animationFrameId);
+      if (loadTimer !== undefined) window.clearTimeout(loadTimer);
       window.removeEventListener("resize", handleResize);
     };
   }, []);

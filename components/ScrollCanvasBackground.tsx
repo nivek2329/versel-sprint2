@@ -9,7 +9,7 @@ interface ScrollCanvasBackgroundProps {
 
 const getFramePath = (index: number) => {
   const padded = String(index).padStart(3, "0");
-  return `/frames/frame_${padded}.png`;
+  return `/frames-webp/frame_${padded}.webp`;
 };
 
 export default function ScrollCanvasBackground({
@@ -28,6 +28,8 @@ export default function ScrollCanvasBackground({
   // Preload frames progressively
   useEffect(() => {
     let isCancelled = false;
+    let remainingFramesTimer: number | undefined;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Load Frame 1 first for immediate render
     const img1 = new Image();
@@ -37,6 +39,12 @@ export default function ScrollCanvasBackground({
       imagesRef.current[0] = img1;
       loadedFlagsRef.current[0] = true;
       setInitialFrameLoaded(true);
+      // Let the hero paint before sending the rest of the animation frames.
+      if (!prefersReducedMotion) {
+        remainingFramesTimer = window.setTimeout(() => {
+          if (!isCancelled) void loadRemainingFrames();
+        }, 350);
+      }
     };
     img1.src = getFramePath(1);
 
@@ -78,13 +86,12 @@ export default function ScrollCanvasBackground({
         }
       };
 
-      await Promise.all(Array.from({ length: 5 }, () => loadWorker()));
+      await Promise.all(Array.from({ length: 3 }, () => loadWorker()));
     };
-
-    loadRemainingFrames();
 
     return () => {
       isCancelled = true;
+      if (remainingFramesTimer !== undefined) window.clearTimeout(remainingFramesTimer);
     };
   }, [totalFrames]);
 
@@ -120,7 +127,7 @@ export default function ScrollCanvasBackground({
     const img = getClosestLoadedImage(Math.round(frameNum));
     if (!img) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, (navigator.hardwareConcurrency || 8) <= 4 ? 1.5 : 2);
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
@@ -158,7 +165,7 @@ export default function ScrollCanvasBackground({
     ctx.restore();
   }, [getClosestLoadedImage]);
 
-  // Scroll listener & persistent animation loop
+  // Scroll listener & eased drawing loop
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -181,6 +188,7 @@ export default function ScrollCanvasBackground({
 
     // RAF Animation Loop with smooth lerp interpolation
     const loop = () => {
+      animFrameIdRef.current = null;
       updateTargetFrame();
 
       if (prefersReducedMotion) {
@@ -196,23 +204,35 @@ export default function ScrollCanvasBackground({
       }
 
       drawFrame(currentFrameRef.current);
-      animFrameIdRef.current = requestAnimationFrame(loop);
+      if (Math.abs(targetFrameRef.current - currentFrameRef.current) > 0.05) {
+        animFrameIdRef.current = requestAnimationFrame(loop);
+      } else {
+        currentFrameRef.current = targetFrameRef.current;
+      }
+    };
+
+    const scheduleFrame = () => {
+      if (animFrameIdRef.current === null) {
+        animFrameIdRef.current = requestAnimationFrame(loop);
+      }
     };
 
     const handleScroll = () => {
       updateTargetFrame();
+      scheduleFrame();
     };
 
     const handleResize = () => {
       updateTargetFrame();
       drawFrame(currentFrameRef.current);
+      scheduleFrame();
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
 
-    // Start persistent animation loop
-    animFrameIdRef.current = requestAnimationFrame(loop);
+    // A scroll-driven background has nothing to animate while the page is idle.
+    scheduleFrame();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);

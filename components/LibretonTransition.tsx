@@ -158,14 +158,6 @@ export default function LibretonTransition({ children }: { children: ReactNode }
       <>
         {children}
 
-        {/* Precarga silenciosa para inicio instantáneo */}
-        <div style={{ display: "none" }} aria-hidden="true">
-          <video src="/videos/portada_menu.mp4" preload="auto" muted playsInline />
-          <video src="/videos/portada_mapa.mp4" preload="auto" muted playsInline />
-          <video src="/videos/menu_cocineras.mp4" preload="auto" muted playsInline />
-          <video src="/videos/libreton_transicion.mp4" preload="auto" muted playsInline />
-        </div>
-
         {active && (
             <div
                 id={OVERLAY_ID}

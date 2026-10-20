@@ -4,7 +4,7 @@ import { ArrowLeft, BookOpen, Home, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#24180f] px-4 py-10 text-[#f6ecda]">
+    <main data-theme-page className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#24180f] px-4 py-10 text-[#f6ecda]">
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-20 bg-[radial-gradient(ellipse_at_50%_25%,#79502f_0%,#3b281b_48%,#1b140f_100%)]"

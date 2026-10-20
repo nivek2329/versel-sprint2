@@ -28,12 +28,6 @@ interface UserProfile {
   isPaused?: boolean;
 }
 
-function homeForRole(role: UserProfile["role"]): string {
-  if (role === "cocinera") return "/cuenta/cocina";
-  if (role === "admin") return "/cuenta/admin";
-  return "/menu";
-}
-
 export default function AdminPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
@@ -43,31 +37,31 @@ export default function AdminPage() {
   useEffect(() => {
     const savedUserJson = localStorage.getItem("ollacercana_user");
     if (!savedUserJson) {
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
       return;
     }
     let parsed: UserProfile;
     try {
       parsed = JSON.parse(savedUserJson);
       if (!parsed.isLoggedIn) {
-        router.push("/cuenta");
+        router.replace("/cuenta/sesion-expirada");
         return;
       }
     } catch (e) {
       console.error(e);
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
       return;
     }
 
     if (parsed.role !== "admin") {
-      router.push(homeForRole(parsed.role));
+      router.replace("/cuenta/acceso-denegado");
       return;
     }
 
     setUser(parsed);
 
     try {
-      setUnreadCount(getStoredNotifications().filter((n) => !n.read).length);
+      setUnreadCount(getStoredNotifications().filter((n) => (n.targetEmail === parsed.email || n.targetEmail === "usuario") && !n.read).length);
     } catch (e) {
       console.error(e);
     }
@@ -77,14 +71,14 @@ export default function AdminPage() {
 
   if (checkingSession || !user) {
     return (
-      <main className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
+      <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
         <p className="text-stone-400 text-sm font-semibold">Cargando...</p>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
+    <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
       <AnimatedKitchenBackground />
 
       <header className="relative z-10 w-full pt-10 pb-6 px-6 flex flex-col items-center justify-center text-center">

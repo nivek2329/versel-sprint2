@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   DishItem,
   getStoredDishes,
   getStoredReservations,
+  addNotification,
   Reservation,
   saveDishes,
   saveReservations,
+  sharesResidentialComplex,
   UserProfile,
 } from "@/lib/ollacercana-store";
 import { MapPin, Star, X, Flame, Sparkles, Clock, CreditCard, Plus, Minus, AlertTriangle } from "lucide-react";
@@ -30,10 +33,21 @@ export default function ReservePortionModal({
   onRequestPhoneVerification,
 }: ReservePortionModalProps) {
   const [portions, setPortions] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<"Efectivo" | "Nequi" | "Daviplata">("Nequi");
+  const [paymentMethod, setPaymentMethod] = useState<"Efectivo" | "Nequi" | "Llaves">("Nequi");
   const [pickupTime, setPickupTime] = useState("Lo antes posible (15-20 min)");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleClose = () => {
+    setPortions(1);
+    setPaymentMethod("Nequi");
+    setPickupTime("Lo antes posible (15-20 min)");
+    setError("");
+    setSuccess("");
+    setSubmitting(false);
+    onClose();
+  };
 
   if (!isOpen || !dish) return null;
 
@@ -63,6 +77,8 @@ export default function ReservePortionModal({
       return;
     }
 
+    setSubmitting(true);
+
     // 1. Create reservation item (HU-11)
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 10 * 60 * 1000).toISOString(); // 10 min countdown (HU-12)
@@ -75,7 +91,11 @@ export default function ReservePortionModal({
       dishName: dish.name,
       dishImage: dish.image,
       cookId: dish.cookId,
+      cookAvatar: dish.cookAvatar,
       cookName: dish.cook,
+      cookResidentialComplex: dish.residentialComplex,
+      buyerResidentialComplex: currentUser.residentialComplex,
+      isSameResidentialComplex: sharesResidentialComplex(currentUser.residentialComplex, dish.residentialComplex),
       buyerName: buyerDisplayName,
       buyerEmail: currentUser.email,
       portions,
@@ -89,7 +109,18 @@ export default function ReservePortionModal({
     };
 
     const currentReservations = getStoredReservations();
-    saveReservations([newReservation, ...currentReservations]);
+    try {
+      saveReservations([newReservation, ...currentReservations]);
+    } catch {
+      setError("No se pudo guardar la solicitud. Inténtalo de nuevo.");
+      setSubmitting(false);
+      return;
+    }
+    addNotification(
+      "Solicitud enviada",
+      `Tu solicitud de ${dish.name} se envió a ${dish.cook}. Te avisaremos cuando responda.`,
+      currentUser.email,
+    );
 
     // 2. Decrement available portions of dish (HU-05)
     const currentDishes = getStoredDishes();
@@ -107,20 +138,22 @@ export default function ReservePortionModal({
     });
     saveDishes(updatedDishes);
 
-    setSuccess("¡Reserva confirmada con éxito! Se ha abierto la sala de chat con la cocinera.");
+    setSuccess(paymentMethod === "Efectivo"
+      ? "Solicitud enviada. La cocinera debe confirmarla; el pago se acuerda al recoger."
+      : "Solicitud enviada. Espera la confirmación de la cocinera antes de transferir; después podrás adjuntar el comprobante.");
     setTimeout(() => {
       onReservationCreated(newReservation.id);
-      onClose();
+      handleClose();
     }, 1200);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 overflow-y-auto animate-fadeIn">
-      <div className="bg-[#e8d1a3] border-[5px] border-[#8d5b37] rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden relative my-4 text-stone-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-fadeIn">
+      <div role="dialog" aria-modal="true" aria-labelledby="reserve-dish-title" className="bg-[#e8d1a3] border-[5px] border-[#8d5b37] rounded-3xl max-w-xl w-full max-h-[calc(100dvh-1.5rem)] shadow-2xl overflow-y-auto overscroll-contain relative text-stone-900">
         <div aria-hidden="true" className="absolute z-20 top-0 left-1/2 -translate-x-1/2 -rotate-2 w-28 h-8 bg-[#d6b776]/90 border-x border-[#b99655]/70 shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
         
         {/* ── 1. RECIPE NOTE HEADER ── */}
-        <div className="bg-[#e8d1a3] p-6 pt-9 sm:p-7 sm:pt-10 text-[#493323] relative border-b border-dashed border-[#927148] shadow-[inset_0_0_30px_rgba(139,94,48,0.16)]" style={{ backgroundImage: "radial-gradient(ellipse at 15% 10%, rgba(255,255,235,.48), transparent 35%), radial-gradient(ellipse at 95% 88%, rgba(135,82,35,.18), transparent 38%), repeating-linear-gradient(4deg, rgba(117,77,41,.035) 0px, rgba(117,77,41,.035) 1px, transparent 2px, transparent 5px)" }}>
+        <div className="bg-[#e8d1a3] p-4 pt-7 sm:p-6 sm:pt-8 text-[#493323] relative border-b border-dashed border-[#927148] shadow-[inset_0_0_30px_rgba(139,94,48,0.16)]" style={{ backgroundImage: "radial-gradient(ellipse at 15% 10%, rgba(255,255,235,.48), transparent 35%), radial-gradient(ellipse at 95% 88%, rgba(135,82,35,.18), transparent 38%), repeating-linear-gradient(4deg, rgba(117,77,41,.035) 0px, rgba(117,77,41,.035) 1px, transparent 2px, transparent 5px)" }}>
           {/* Top Pills Row */}
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
@@ -136,7 +169,9 @@ export default function ReservePortionModal({
 
             {/* Circular Close Button */}
             <button
-              onClick={onClose}
+              type="button"
+              onClick={handleClose}
+              aria-label="Cerrar reserva"
               className="w-8 h-8 rounded-full bg-[#a84c2f] hover:bg-[#873820] text-white flex items-center justify-center transition-colors shadow-md shrink-0"
               title="Cerrar"
             >
@@ -146,7 +181,7 @@ export default function ReservePortionModal({
 
           {/* Dish Title */}
           <span className="font-['Caveat',cursive] text-sm font-bold text-[#a84c2f]">Receta de la vecina · apuntada en el libretón</span>
-          <h2 className="font-['Caveat',cursive] text-3xl sm:text-4xl font-bold text-[#493323] tracking-tight leading-tight mb-3 mt-1">
+          <h2 id="reserve-dish-title" className="font-['Caveat',cursive] text-3xl sm:text-4xl font-bold text-[#493323] tracking-tight leading-tight mb-3 mt-1">
             {dish.name}
           </h2>
 
@@ -168,7 +203,7 @@ export default function ReservePortionModal({
         </div>
 
         {/* ── 2. LIGHT CREAM / OFF-WHITE CARD BODY ── */}
-        <div className="bg-[#FAF6F0] p-6 sm:p-7 space-y-5 max-h-[72vh] overflow-y-auto">
+        <div className="bg-[#FAF6F0] p-4 sm:p-6 space-y-4 sm:space-y-5">
           
           {/* Dish Photo Card with Badge */}
           <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg border border-stone-300/70">
@@ -273,24 +308,30 @@ export default function ReservePortionModal({
             {/* Payment Method Options */}
             <div className="bg-white border border-stone-200/90 rounded-2xl p-4 shadow-sm space-y-2">
               <label className="text-xs font-bold text-stone-800 block">
-                Medio de pago preferido (acordar con cocinera)
+                ¿Cómo acordarás el pago?
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {(["Nequi", "Daviplata", "Efectivo"] as const).map((method) => (
+                {(["Nequi", "Llaves", "Efectivo"] as const).map((method) => (
                   <button
                     type="button"
                     key={method}
-                    onClick={() => setPaymentMethod(method)}
-                    className={`py-2 px-2 text-xs rounded-xl border text-center font-bold transition-all ${
+                    onClick={() => { setPaymentMethod(method); setError(""); }}
+                    aria-pressed={paymentMethod === method}
+                    className={`min-w-0 rounded-xl border p-2 text-center text-xs font-bold transition-all ${
                       paymentMethod === method
-                        ? "bg-[#F0822D] border-[#F0822D] text-white shadow-md"
-                        : "bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100"
+                        ? "border-[#b94d2e] bg-[#fff0d7] text-[#432b1b] shadow-[0_0_0_2px_rgba(185,77,46,.18)]"
+                        : "border-stone-200 bg-stone-50 text-stone-700 hover:bg-stone-100"
                     }`}
                   >
-                    {method}
+                    <span className={`mx-auto mb-1.5 flex aspect-[3/2] w-full max-w-[96px] items-center justify-center overflow-hidden rounded-lg ${method === "Llaves" ? "bg-[#32005f]" : "bg-white"}`}>
+                      <Image src={method === "Nequi" ? "/images/nequi.jpg" : method === "Llaves" ? "/images/llaves.png" : "/images/efectivo.png"} alt={`Pago por ${method}`} width={96} height={64} className="h-full w-full object-contain" />
+                    </span>
+                    <span className="block">{method === "Llaves" ? "Llaves" : method === "Nequi" ? "Nequi" : "Efectivo"}</span>
+                    {method === "Llaves" && <span className="mt-0.5 block text-[9px] uppercase tracking-wider opacity-75">Bre-B</span>}
                   </button>
                 ))}
               </div>
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-relaxed text-amber-900">{paymentMethod === "Efectivo" ? <>No tienes que pagar ahora. La cocinera confirmará la solicitud y acordarás el pago en efectivo al recoger.</> : <>No transfieras todavía. Primero la cocinera debe confirmar la solicitud; después podrás adjuntar el comprobante desde <strong>Mis pedidos</strong>.</>}</p>
             </div>
 
             {/* Estimated Pickup Time */}
@@ -318,11 +359,10 @@ export default function ReservePortionModal({
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-amber-900 font-bold mb-0.5">
-                    Aviso Importante de Pago (RN-02 / HU-14):
+                    OllaCercana no procesa pagos:
                   </strong>
-                  OllaCercana no procesa dinero directamente. El pago total de{" "}
-                  <strong className="text-amber-950 font-black">{formattedTotal}</strong> se coordinará directamente
-                  entre tú y <strong className="text-amber-950 font-black">{dish.cook}</strong> al momento de entregar tus porciones (vía {paymentMethod} o efectivo).
+                  El total de <strong className="text-amber-950 font-black">{formattedTotal}</strong> se coordinará directamente{" "}
+                  {paymentMethod === "Efectivo" ? <>entre tú y <strong className="text-amber-950 font-black">{dish.cook}</strong> al recoger las porciones.</> : <>por {paymentMethod} fuera de OllaCercana. Espera a que <strong className="text-amber-950 font-black">{dish.cook}</strong> confirme antes de pagar; luego adjunta el comprobante en Mis pedidos.</>}
                 </div>
               </div>
             </div>
@@ -331,14 +371,15 @@ export default function ReservePortionModal({
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="submit"
-                className="flex-1 py-3.5 px-6 rounded-full bg-gradient-to-r from-[#F0822D] to-[#E06F1A] hover:brightness-110 text-white font-bold text-sm transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                disabled={submitting}
+                className="flex-1 py-3.5 px-6 rounded-full bg-gradient-to-r from-[#F0822D] to-[#E06F1A] hover:brightness-110 text-white font-bold text-sm transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-wait disabled:opacity-70"
               >
-                <span>Confirmar Reserva y Pedir ({formattedTotal}) →</span>
+                <span>{submitting ? "Enviando solicitud…" : "Enviar solicitud"} {!submitting && `(${formattedTotal}) →`}</span>
               </button>
 
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="py-3.5 px-6 rounded-full bg-stone-200/90 hover:bg-stone-300 text-stone-700 font-bold text-sm transition-all cursor-pointer text-center"
               >
                 Seguir explorando

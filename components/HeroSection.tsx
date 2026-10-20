@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, MapPin, Phone } from "lucide-react";
+import { MapPin, ChefHat, UtensilsCrossed, ChevronDown, Sparkles, CircleHelp } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 export default function HeroSection() {
@@ -11,7 +11,8 @@ export default function HeroSection() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const kitchenHeight = document.getElementById("kitchen-scroll")?.getBoundingClientRect().height ?? document.documentElement.scrollHeight;
+      const scrollHeight = kitchenHeight - window.innerHeight;
       if (scrollHeight > 0) {
         const progress = Math.max(0, Math.min(1, scrollY / scrollHeight));
         setScrollProgress(progress);
@@ -30,30 +31,81 @@ export default function HeroSection() {
   const titleOpacity = Math.max(0, Math.min(1, 1 - scrollProgress * 2.2));
   const titleScale = 1 + scrollProgress * 0.08;
 
-  // Glass pill buttons fade in ONLY at final kitchen table scene (~82% to 100% scroll)
-  const buttonsOpacity = scrollProgress < 0.82 
+  // Glass pill buttons fade in smoothly at kitchen table scene (~65% to 100% scroll)
+  const buttonsOpacity = scrollProgress < 0.65 
     ? 0 
-    : Math.max(0, Math.min(1, (scrollProgress - 0.82) * 5.5));
+    : Math.max(0, Math.min(1, (scrollProgress - 0.65) * 3.5));
+
+  const quickBarOpacity = 1;
+
+  const handleScrollDownClick = () => {
+    const guide = document.getElementById("community-guide");
+    if (!guide) return;
+
+    const targetTop = guide.getBoundingClientRect().top + window.scrollY - 24;
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    window.dispatchEvent(new Event("ollacercana:show-home-guide"));
+  };
 
   return (
-    <section className="relative h-full w-full bg-transparent text-white flex flex-col items-center justify-between overflow-hidden select-none font-sans min-h-screen">
+    <section className="relative h-full w-full bg-transparent text-[#FAF3E7] flex flex-col items-center justify-between overflow-hidden select-none font-sans min-h-screen">
       
       {/* ========================================================================= */}
       {/* 1. STARTING TITLE LOCKUP (0% SCROLL - FADES OUT ON SCROLL) */}
       {/* ========================================================================= */}
       <div 
-        className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-8 md:px-12 flex flex-col items-center justify-center text-center pointer-events-none transition-opacity duration-75 ease-out my-auto"
+        className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-8 md:px-12 flex flex-col items-center justify-center text-center pointer-events-none transition-opacity duration-75 ease-out my-auto pt-8"
         style={{
           opacity: titleOpacity,
           transform: `scale(${titleScale})`,
           visibility: titleOpacity === 0 ? "hidden" : "visible",
         }}
       >
-        <BrandLogo size="xl" showTagline={true} taglineColor="text-white drop-shadow-md" />
+        <BrandLogo size="xl" showTagline={true} taglineColor="text-[#FDF3D6] drop-shadow-md" />
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. INTERACTIVE GLASS PILL BADGES POSITIONED DIRECTLY OVER TABLE OBJECTS */}
+      {/* 2. SCROLL GUIDANCE & QUICK ACCESS BAR */}
+      {/* ========================================================================= */}
+      <div 
+        className="relative z-40 w-full max-w-4xl mx-auto px-4 pb-6 flex flex-col items-center gap-3 transition-opacity duration-300 pointer-events-auto"
+        style={{ opacity: quickBarOpacity }}
+      >
+        {/* Scroll Hint (Desliza hacia abajo) */}
+        {scrollProgress < 0.25 && (
+          <button 
+            onClick={handleScrollDownClick}
+            className="group flex flex-col items-center gap-1.5 cursor-pointer text-[#FAF3E7] hover:text-[#F4C430] transition-all transform hover:scale-105"
+            aria-label="Avanzar hasta los accesos al menú, al mapa y a las cocineras"
+          >
+            <span className="font-['Caveat',cursive] text-lg sm:text-xl font-bold tracking-wide flex items-center gap-1.5 bg-[#2B2117]/90 px-3.5 py-1 rounded-full border border-[#F0822D]/50 shadow-md">
+              <Sparkles className="w-4 h-4 text-[#F4C430] animate-pulse" />
+              Explora la cocina y sus accesos
+            </span>
+            <span className="text-center text-[10px] font-bold tracking-wide text-[#FAF3E7]/90">
+              Desliza hacia abajo para recorrer la cocina de la abuelita
+            </span>
+            <ChevronDown className="w-6 h-6 text-[#F0822D] animate-bounce" />
+          </button>
+        )}
+
+        {scrollProgress >= 0.25 && scrollProgress < 0.65 && (
+          <p className="rounded-full border border-[#F0822D]/50 bg-[#2B2117]/90 px-4 py-2 text-center text-xs font-bold text-[#FAF3E7] shadow-md">
+            Sigue deslizando · Mapa, cocineras y menú en los objetos de la cocina
+          </p>
+        )}
+
+        {scrollProgress >= 0.65 && (
+          <p className="rounded-full border border-[#62B869]/60 bg-[#2B2117]/95 px-4 py-1.5 text-center text-xs font-bold text-[#62B869] shadow-lg flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#62B869] animate-ping" />
+            ¡Toca los elementos de la cocina para explorar!
+          </p>
+        )}
+
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. INTERACTIVE CHALKBOARD PILL BADGES OVER EXACT CANVAS OBJECTS */}
       {/* ========================================================================= */}
       <div 
         className="absolute inset-0 z-30 w-full h-full pointer-events-auto transition-all duration-300 ease-out"
@@ -62,77 +114,77 @@ export default function HeroSection() {
           visibility: buttonsOpacity === 0 ? "hidden" : "visible",
         }}
       >
-        <div className="relative w-full h-full max-w-6xl mx-auto">
+        <div className="relative w-full h-full inset-0">
           
           {/* =================================================================== */}
-          {/* BADGE 1: LIBRETÓN (OVER NOTEBOOK ON LEFT) */}
-          {/* =================================================================== */}
-          <Link
-            href="/menu"
-            className="group absolute left-[8%] sm:left-[15%] lg:left-[20%] top-[45%] sm:top-[48%] lg:top-[50%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 z-30"
-          >
-            {/* Dark Glassmorphic Pill */}
-            <div className="glass-pill-dark px-4 py-2.5 rounded-full flex items-center gap-3 border border-white/25 shadow-[0_10px_25px_rgba(0,0,0,0.8)] group-hover:border-orange-400/80 group-hover:bg-stone-900/95 transition-all">
-              <BookOpen className="w-4 h-4 text-orange-400 shrink-0" />
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-xs font-bold text-white tracking-wide font-['Outfit']">Libretón</span>
-                <span className="text-[10px] text-stone-300 font-light">(Clic para abrir)</span>
-              </div>
-            </div>
-
-            {/* Bouncing Hand Cursor */}
-            <div className="mt-1.5 animate-hand-bounce text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              <svg className="w-5 h-5 fill-white stroke-black stroke-[1.5]" viewBox="0 0 24 24">
-                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v-1.5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2V14l-2.2-2.2a2 2 0 0 0-2.8 2.8L9 21.5C10.5 23 12.5 24 14.5 24H17a5 5 0 0 0 5-5v-6a2 2 0 0 0-2-2z"/>
-              </svg>
-            </div>
-          </Link>
-
-          {/* =================================================================== */}
-          {/* BADGE 2: MAPA DE PROXIMIDAD (OVER MAP IN CENTER) */}
+          {/* BADGE 1: MAPA (VERDE - EN LA VENTANA DERECHA DE LA COCINA) */}
           {/* =================================================================== */}
           <Link
             href="/cocineras-cercanas"
-            className="group absolute left-1/2 -translate-x-1/2 top-[38%] sm:top-[40%] lg:top-[42%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 z-30"
+            className="group absolute right-[4%] sm:right-[7%] lg:right-[9%] top-[16%] sm:top-[18%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-110 z-30"
           >
-            {/* Dark Glassmorphic Pill */}
-            <div className="glass-pill-dark px-4 py-2.5 rounded-full flex items-center gap-3 border border-white/25 shadow-[0_10px_25px_rgba(0,0,0,0.8)] group-hover:border-lime-400/80 group-hover:bg-stone-900/95 transition-all">
-              <MapPin className="w-4 h-4 text-lime-400 shrink-0" />
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-xs font-bold text-white tracking-wide font-['Outfit']">Mapa de Proximidad</span>
-                <span className="text-[10px] text-stone-300 font-light">(Clic para abrir)</span>
+            {/* Pulsing ring indicator */}
+            <div className="relative">
+              <span className="absolute -inset-1 rounded-full bg-[#62B869]/50 blur-sm animate-pulse group-hover:bg-[#62B869]/80" />
+              <div className="relative bg-[#2B2117]/95 border-2 border-[#62B869] px-4 py-2 rounded-full flex items-center gap-2.5 shadow-[0_8px_25px_rgba(43,33,23,0.85)] group-hover:bg-[#5B4A38]">
+                <MapPin className="w-5 h-5 text-[#62B869] shrink-0 animate-bounce" />
+                <div className="flex flex-col text-left leading-none">
+                  <span className="font-['Caveat',cursive] text-xl font-bold text-[#FAF3E7] tracking-wide">Mapa</span>
+                  <span className="text-[10px] font-sans text-[#62B869] font-bold uppercase tracking-wider">¡Comida cerca de ti!</span>
+                </div>
               </div>
             </div>
-
-            {/* Bouncing Hand Cursor */}
-            <div className="mt-1.5 animate-hand-bounce text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              <svg className="w-5 h-5 fill-white stroke-black stroke-[1.5]" viewBox="0 0 24 24">
-                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v-1.5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2V14l-2.2-2.2a2 2 0 0 0-2.8 2.8L9 21.5C10.5 23 12.5 24 14.5 24H17a5 5 0 0 0 5-5v-6a2 2 0 0 0-2-2z"/>
-              </svg>
+            {/* Hand Pointer */}
+            <div className="mt-1.5 flex items-center gap-1 bg-[#2B2117]/95 px-2.5 py-0.5 rounded-full border border-[#62B869]/70 shadow-md">
+              <span className="text-[10px] font-bold text-[#FAF3E7] font-sans">Toca para abrir el mapa del barrio</span>
             </div>
           </Link>
 
           {/* =================================================================== */}
-          {/* BADGE 3: TELÉFONO DE VERIFICACIÓN (OVER PHONE ON RIGHT) */}
+          {/* BADGE 2: COCINERAS (AMARILLO - EN EL GABINETE / ESTANTERÍA DE OLLAS) */}
           {/* =================================================================== */}
           <Link
-            href="/cuenta/perfil"
-            className="group absolute right-[8%] sm:right-[15%] lg:right-[18%] top-[48%] sm:top-[50%] lg:top-[52%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 z-30"
+            href="/cocineras-cercanas"
+            className="group absolute left-[30%] sm:left-[35%] lg:left-[38%] top-[18%] sm:top-[20%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-110 z-30"
           >
-            {/* Dark Glassmorphic Pill */}
-            <div className="glass-pill-dark px-4 py-2.5 rounded-full flex items-center gap-3 border border-white/25 shadow-[0_10px_25px_rgba(0,0,0,0.8)] group-hover:border-amber-400/80 group-hover:bg-stone-900/95 transition-all">
-              <Phone className="w-4 h-4 text-amber-400 shrink-0" />
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-xs font-bold text-white tracking-wide font-['Outfit']">Teléfono de Verificación</span>
-                <span className="text-[10px] text-stone-300 font-light">(Clic para abrir)</span>
+            {/* Pulsing ring indicator */}
+            <div className="relative">
+              <span className="absolute -inset-1 rounded-full bg-[#F4C430]/50 blur-sm animate-pulse group-hover:bg-[#F4C430]/80" />
+              <div className="relative bg-[#2B2117]/95 border-2 border-[#F4C430] px-4 py-2 rounded-full flex items-center gap-2.5 shadow-[0_8px_25px_rgba(43,33,23,0.85)] group-hover:bg-[#5B4A38]">
+                <ChefHat className="w-5 h-5 text-[#F4C430] shrink-0 animate-bounce" />
+                <div className="flex flex-col text-left leading-none">
+                  <span className="font-['Caveat',cursive] text-xl font-bold text-[#FAF3E7] tracking-wide">Cocineras</span>
+                  <span className="text-[10px] font-sans text-[#F4C430] font-bold uppercase tracking-wider">¡Sabor de barrio!</span>
+                </div>
               </div>
             </div>
+            {/* Hand Pointer */}
+            <div className="mt-1.5 flex items-center gap-1 bg-[#2B2117]/95 px-2.5 py-0.5 rounded-full border border-[#F4C430]/70 shadow-md">
+              <span className="text-[10px] font-bold text-[#FAF3E7] font-sans">Toca para encontrar cocineras</span>
+            </div>
+          </Link>
 
-            {/* Bouncing Hand Cursor */}
-            <div className="mt-1.5 animate-hand-bounce text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-              <svg className="w-5 h-5 fill-white stroke-black stroke-[1.5]" viewBox="0 0 24 24">
-                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v-1.5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2V14l-2.2-2.2a2 2 0 0 0-2.8 2.8L9 21.5C10.5 23 12.5 24 14.5 24H17a5 5 0 0 0 5-5v-6a2 2 0 0 0-2-2z"/>
-              </svg>
+          {/* =================================================================== */}
+          {/* BADGE 3: MENÚ (NARANJA - SOBRE LA PLANCHA DE AREPAS EN LA MESA)    */}
+          {/* =================================================================== */}
+          <Link
+            href="/menu"
+            className="group absolute left-1/2 -translate-x-1/2 top-[68%] sm:top-[70%] -translate-y-1/2 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-110 z-30"
+          >
+            {/* Pulsing ring indicator */}
+            <div className="relative">
+              <span className="absolute -inset-1 rounded-full bg-[#F0822D]/60 blur-sm animate-pulse group-hover:bg-[#F0822D]/90" />
+              <div className="relative bg-[#2B2117]/95 border-2 border-[#F0822D] px-5 py-2.5 rounded-full flex items-center gap-2.5 shadow-[0_8px_25px_rgba(43,33,23,0.85)] group-hover:bg-[#5B4A38]">
+                <UtensilsCrossed className="w-5 h-5 text-[#F0822D] shrink-0 animate-bounce" />
+                <div className="flex flex-col text-left leading-none">
+                  <span className="font-['Caveat',cursive] text-2xl font-bold text-[#FAF3E7] tracking-wide">Menú del Día</span>
+                  <span className="text-[10px] font-sans text-[#F0822D] font-bold uppercase tracking-wider">¡Arepas & Platos calientes!</span>
+                </div>
+              </div>
+            </div>
+            {/* Hand Pointer */}
+            <div className="mt-1.5 flex items-center gap-1 bg-[#2B2117]/95 px-3 py-0.5 rounded-full border border-[#F0822D]/70 shadow-md">
+              <span className="text-[10px] font-bold text-[#FAF3E7] font-sans">Toca para explorar los platos caseros</span>
             </div>
           </Link>
 

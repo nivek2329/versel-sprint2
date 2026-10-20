@@ -9,11 +9,19 @@ import AccountNav from "@/components/AccountNav";
 import PublishDishModal from "@/components/modals/PublishDishModal";
 import PhoneVerificationModal from "@/components/modals/PhoneVerificationModal";
 import SalesHistoryModal from "@/components/modals/SalesHistoryModal";
+import ChatModal from "@/components/modals/ChatModal";
+import OllaChatMark from "@/components/OllaChatMark";
 import {
   getStoredReservations,
   getStoredNotifications,
+  addNotification,
   getStoredDishes,
   saveDishes,
+  saveReservations,
+  sharesResidentialComplex,
+  syncOllaVerdeProgressAfterCompletion,
+  syncVecinoFielAfterCompletion,
+  hasPendingChatMessage,
   DishItem,
 } from "@/lib/ollacercana-store";
 import {
@@ -70,13 +78,12 @@ interface Reservation {
   isAutoClosed?: boolean;
   rated?: boolean;
   cookName?: string;
+  cookResidentialComplex?: string;
+  buyerResidentialComplex?: string;
+  isSameResidentialComplex?: boolean;
   pickupTime?: string;
-}
-
-function homeForRole(role: UserProfile["role"]): string {
-  if (role === "cocinera") return "/cuenta/cocina";
-  if (role === "admin") return "/cuenta/admin";
-  return "/menu";
+  paymentReceipt?: string;
+  paymentReceiptName?: string;
 }
 
 const getDefaultReservations = (): Reservation[] => [
@@ -119,8 +126,38 @@ export default function CocinaPage() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [activeChatReservationId, setActiveChatReservationId] = useState<string | null>(null);
   const [dishesList, setDishesList] = useState<DishItem[]>([]);
   const [dishAvailabilityError, setDishAvailabilityError] = useState<string | null>(null);
+
+  // HU-24 / OC-113: detectar conflicto de versión (409) al ajustar disponibilidad.
+  // Como la app corre sobre localStorage, el "backend" es el store compartido: si otra
+  // pestaña/sesión (p. ej. una reserva) modificó el plato desde que esta vista lo cargó,
+  // se simula la respuesta 409 del backend en vez de sobrescribir datos obsoletos.
+  const applyDishAvailabilityUpdate = (
+    staleDish: DishItem,
+    mutate: (liveDish: DishItem) => DishItem
+  ) => {
+    setDishAvailabilityError(null);
+    const liveDishes = getStoredDishes();
+    const liveDish = liveDishes.find((item) => item.id === staleDish.id);
+
+    if (
+      !liveDish ||
+      liveDish.availablePortions !== staleDish.availablePortions ||
+      liveDish.totalPortions !== staleDish.totalPortions ||
+      liveDish.reservedPortions !== staleDish.reservedPortions ||
+      liveDish.status !== staleDish.status
+    ) {
+      setDishAvailabilityError("El plato fue modificado por otra reserva, refresca los datos.");
+      setDishesList(liveDishes);
+      return;
+    }
+
+    const updated = liveDishes.map((item) => (item.id === liveDish.id ? mutate(liveDish) : item));
+    setDishesList(updated);
+    saveDishes(updated);
+  };
 
   const [rejectingResId, setRejectingResId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("Sin porciones disponibles");
@@ -134,24 +171,24 @@ export default function CocinaPage() {
   useEffect(() => {
     const savedUserJson = localStorage.getItem("ollacercana_user");
     if (!savedUserJson) {
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
       return;
     }
     let parsed: UserProfile;
     try {
       parsed = JSON.parse(savedUserJson);
       if (!parsed.isLoggedIn) {
-        router.push("/cuenta");
+        router.replace("/cuenta/sesion-expirada");
         return;
       }
     } catch (e) {
       console.error(e);
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
       return;
     }
 
     if (parsed.role !== "cocinera") {
-      router.push(homeForRole(parsed.role));
+      router.replace("/cuenta/acceso-denegado");
       return;
     }
 
@@ -181,6 +218,11 @@ export default function CocinaPage() {
             buyerName: sr.buyerName,
             buyerPhone: "3001234567",
             paymentMethod: sr.preferredPaymentMethod,
+            cookResidentialComplex: sr.cookResidentialComplex || parsed.residentialComplex,
+            buyerResidentialComplex: sr.buyerResidentialComplex,
+            isSameResidentialComplex: sr.isSameResidentialComplex ?? sharesResidentialComplex(parsed.residentialComplex, sr.buyerResidentialComplex),
+            paymentReceipt: sr.paymentReceipt,
+            paymentReceiptName: sr.paymentReceiptName,
             price: `$${sr.totalPrice.toLocaleString("es-CO")}`,
             status:
               sr.status === "PENDIENTE"
@@ -211,7 +253,7 @@ export default function CocinaPage() {
     }
 
     try {
-      setUnreadCount(getStoredNotifications().filter((n) => !n.read).length);
+      setUnreadCount(getStoredNotifications().filter((n) => (n.targetEmail === parsed.email || n.targetEmail === "usuario") && !n.read).length);
     } catch (e) {
       console.error(e);
     }
@@ -252,9 +294,12 @@ export default function CocinaPage() {
   };
 
   const handleConfirmReservation = (resId: string) => {
+    const reservationInfo = getStoredReservations().find((reservation) => reservation.id === resId);
     const updated = reservations.map((r) => (r.id === resId ? { ...r, status: "confirmed" as const } : r));
     setReservations(updated);
     localStorage.setItem("ollacercana_reservations", JSON.stringify(updated));
+    saveReservations(getStoredReservations().map((reservation) => reservation.id === resId ? { ...reservation, status: "CONFIRMADO" } : reservation));
+    if (reservationInfo) addNotification("Reserva confirmada", `${reservationInfo.cookName} confirmó tu pedido de ${reservationInfo.dishName}.`, reservationInfo.buyerEmail);
   };
 
   const handleOpenRejectModal = (resId: string) => {
@@ -272,6 +317,7 @@ export default function CocinaPage() {
       return;
     }
 
+    const reservationInfo = getStoredReservations().find((reservation) => reservation.id === rejectingResId);
     const updated = reservations.map((r) =>
       r.id === rejectingResId
         ? {
@@ -285,6 +331,8 @@ export default function CocinaPage() {
 
     setReservations(updated);
     localStorage.setItem("ollacercana_reservations", JSON.stringify(updated));
+    saveReservations(getStoredReservations().map((reservation) => reservation.id === rejectingResId ? { ...reservation, status: "RECHAZADA" } : reservation));
+    if (reservationInfo) addNotification("Solicitud no aceptada", `${reservationInfo.cookName} no pudo aceptar tu pedido de ${reservationInfo.dishName}.`, reservationInfo.buyerEmail);
     setRejectingResId(null);
   };
 
@@ -301,6 +349,11 @@ export default function CocinaPage() {
     });
     setReservations(updated);
     localStorage.setItem("ollacercana_reservations", JSON.stringify(updated));
+    saveReservations(getStoredReservations().map((reservation) => {
+      const local = updated.find((item) => item.id === reservation.id);
+      if (reservation.id !== resId || !local) return reservation;
+      return { ...reservation, cookConfirmedDelivery: local.cocineraConfirmedDelivery, cookConfirmedPayment: local.cocineraConfirmedPayment };
+    }));
   };
 
   const handleConfirmClosing = (resId: string) => {
@@ -318,6 +371,24 @@ export default function CocinaPage() {
     });
     setReservations(updated);
     localStorage.setItem("ollacercana_reservations", JSON.stringify(updated));
+    const completedAt = new Date().toISOString();
+    const savedReservations = getStoredReservations().map((reservation) => {
+      if (reservation.id !== resId) return reservation;
+      const isCompleted = Boolean(updated.find((item) => item.id === resId)?.compradorClosedAt);
+      return {
+        ...reservation,
+        status: isCompleted ? "COMPLETADA" as const : "CONFIRMADO" as const,
+        completedAt: isCompleted ? completedAt : reservation.completedAt,
+        cookConfirmedDelivery: true,
+        cookConfirmedPayment: true,
+      };
+    });
+    saveReservations(savedReservations);
+    const completedReservation = savedReservations.find((reservation) => reservation.id === resId && reservation.status === "COMPLETADA");
+    if (completedReservation) {
+      syncOllaVerdeProgressAfterCompletion(completedReservation);
+      syncVecinoFielAfterCompletion(completedReservation);
+    }
   };
 
   const handleSimulateCompradorConfirm = (resId: string) => {
@@ -335,18 +406,28 @@ export default function CocinaPage() {
     });
     setReservations(updated);
     localStorage.setItem("ollacercana_reservations", JSON.stringify(updated));
+    const completedAt = new Date().toISOString();
+    const savedReservations = getStoredReservations().map((reservation) => reservation.id === resId && updated.find((item) => item.id === resId)?.cocineraClosedAt
+      ? { ...reservation, status: "COMPLETADA" as const, completedAt, buyerConfirmedDelivery: true }
+      : reservation);
+    saveReservations(savedReservations);
+    const completedReservation = savedReservations.find((reservation) => reservation.id === resId && reservation.status === "COMPLETADA");
+    if (completedReservation) {
+      syncOllaVerdeProgressAfterCompletion(completedReservation);
+      syncVecinoFielAfterCompletion(completedReservation);
+    }
   };
 
   if (checkingSession || !user) {
     return (
-      <main className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
+      <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
         <p className="text-stone-400 text-sm font-semibold">Cargando...</p>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
+    <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
       <AnimatedKitchenBackground />
 
       <header className="relative z-10 w-full pt-10 pb-6 px-6 flex flex-col items-center justify-center text-center">
@@ -486,17 +567,12 @@ export default function CocinaPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
-                        setDishAvailabilityError(null);
-                        const updated = dishesList.map((item) => {
-                          if (item.id === d.id) {
-                            const newTotal = item.totalPortions + 1;
-                            const newAvail = item.availablePortions + 1;
-                            return { ...item, totalPortions: newTotal, availablePortions: newAvail, status: "DISPONIBLE" as const };
-                          }
-                          return item;
-                        });
-                        setDishesList(updated);
-                        saveDishes(updated);
+                        applyDishAvailabilityUpdate(d, (live) => ({
+                          ...live,
+                          totalPortions: live.totalPortions + 1,
+                          availablePortions: live.availablePortions + 1,
+                          status: "DISPONIBLE" as const,
+                        }));
                       }}
                       className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold flex items-center gap-1"
                       title="Aumentar disponibilidad"
@@ -515,19 +591,14 @@ export default function CocinaPage() {
                           return;
                         }
                         if (d.availablePortions <= 0) return;
-                        const updated = dishesList.map((item) => {
-                          if (item.id === d.id) {
-                            const newAvail = Math.max(0, item.availablePortions - 1);
-                            return {
-                              ...item,
-                              availablePortions: newAvail,
-                              status: (newAvail === 0 ? "AGOTADO" : "DISPONIBLE") as any,
-                            };
-                          }
-                          return item;
+                        applyDishAvailabilityUpdate(d, (live) => {
+                          const newAvail = Math.max(0, live.availablePortions - 1);
+                          return {
+                            ...live,
+                            availablePortions: newAvail,
+                            status: (newAvail === 0 ? "AGOTADO" : "DISPONIBLE") as any,
+                          };
                         });
-                        setDishesList(updated);
-                        saveDishes(updated);
                       }}
                       className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold flex items-center gap-1"
                       title="Disminuir disponibilidad"
@@ -538,15 +609,11 @@ export default function CocinaPage() {
 
                     <button
                       onClick={() => {
-                        setDishAvailabilityError(null);
-                        const updated = dishesList.map((item) => {
-                          if (item.id === d.id) {
-                            return { ...item, availablePortions: 0, status: "AGOTADO" as const };
-                          }
-                          return item;
-                        });
-                        setDishesList(updated);
-                        saveDishes(updated);
+                        applyDishAvailabilityUpdate(d, (live) => ({
+                          ...live,
+                          availablePortions: 0,
+                          status: "AGOTADO" as const,
+                        }));
                       }}
                       className="px-3 py-1.5 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-1"
                     >
@@ -593,7 +660,7 @@ export default function CocinaPage() {
                             : "bg-rose-500/20 text-rose-300"
                         }`}
                       >
-                        {res.status}
+                        {res.status === "pending" ? (res.paymentReceipt ? "Comprobante recibido" : "Pendiente") : res.status === "confirmed" ? "Confirmado" : res.status === "closed" ? "Completado" : "Rechazado"}
                       </span>
                     </div>
                   </div>
@@ -602,6 +669,7 @@ export default function CocinaPage() {
                     <div>
                       <span className="text-stone-500 block text-[10px] uppercase">Comprador</span>
                       <span className="font-semibold text-white">{res.buyerName}</span>
+                      {res.isSameResidentialComplex && <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-2 py-0.5 text-[9px] font-bold text-emerald-200"><Home className="h-3 w-3" /> Del mismo conjunto</span>}
                     </div>
                     <div>
                       <span className="text-stone-500 block text-[10px] uppercase">Cantidad</span>
@@ -616,6 +684,27 @@ export default function CocinaPage() {
                       <span className="font-bold text-[#F0822D]">{res.price}</span>
                     </div>
                   </div>
+
+                  {res.paymentReceipt && (
+                    <a href={res.paymentReceipt} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-900/60">
+                      <CheckCircle2 className="h-4 w-4" /> Revisar comprobante: {res.paymentReceiptName || "ver archivo"}
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveChatReservationId(res.id)}
+                    className="relative inline-flex items-center gap-2 rounded-xl border border-[#75865a]/70 bg-[#dce4ce] px-4 py-2.5 text-xs font-bold text-[#42542e] transition hover:bg-[#cdd9b9]"
+                  >
+                    {user && hasPendingChatMessage(res.id, user) && (
+                      <span
+                        aria-label="Mensaje pendiente"
+                        className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-[#f3f8ee] bg-[#e8542f]"
+                      />
+                    )}
+                    <OllaChatMark className="h-6 w-7" />
+                    {res.status === "closed" || res.status === "rejected" ? "Ver conversación" : "Chat con comprador"}
+                  </button>
 
                   {res.status === "pending" && (
                     <div className="flex items-center gap-3 pt-2">
@@ -807,6 +896,19 @@ export default function CocinaPage() {
           setUser(updated);
           localStorage.setItem("ollacercana_user", JSON.stringify(updated));
         }}
+      />
+
+      <ChatModal
+        isOpen={!!activeChatReservationId}
+        onClose={() => {
+          const sharedReservations = getStoredReservations();
+          setReservations((previous) => previous.map((item) => sharedReservations.some((reservation) => reservation.id === item.id && reservation.status === "COMPLETADA")
+            ? { ...item, status: "closed" }
+            : item));
+          setActiveChatReservationId(null);
+        }}
+        reservationId={activeChatReservationId}
+        currentUser={user}
       />
     </main>
   );

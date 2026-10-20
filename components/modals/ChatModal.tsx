@@ -3,14 +3,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   ChatMessage,
+  getStoredDishes,
   getStoredMessages,
   getStoredReservations,
   Reservation,
   saveMessages,
   saveReservations,
+  syncOllaVerdeProgressAfterCompletion,
+  syncVecinoFielAfterCompletion,
   UserProfile,
 } from "@/lib/ollacercana-store";
-import { MessageSquare, Clock, Lock, CheckCircle2, X, Send } from "lucide-react";
+import { Clock, Lock, CheckCircle2, X, Send, UserRound } from "lucide-react";
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -54,11 +57,15 @@ export default function ChatModal({
         ];
         saveMessages(found.id, initialMsgs);
         setMessages(initialMsgs);
+        localStorage.setItem(`ollacercana_chat_read_${found.id}_${currentUser.email}`, initialMsgs[initialMsgs.length - 1].id);
       } else {
         setMessages(history);
+        const viewerName = currentUser.name || currentUser.commercialName || currentUser.email;
+        const lastIncoming = [...history].reverse().find((message) => message.sender !== viewerName && message.sender !== currentUser.commercialName && message.sender !== currentUser.email && message.sender !== "Sistema OllaCercana");
+        if (lastIncoming) localStorage.setItem(`ollacercana_chat_read_${found.id}_${currentUser.email}`, history[history.length - 1].id);
       }
     }
-  }, [reservationId, isOpen]);
+  }, [reservationId, isOpen, currentUser.commercialName, currentUser.email, currentUser.name]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -100,6 +107,8 @@ export default function ChatModal({
     reservation.status === "COMPLETADA" ||
     reservation.status === "RECHAZADA" ||
     reservation.status === "EXPIRADA";
+  const matchingDish = getStoredDishes().find((dish) => dish.id === reservation.dishId || dish.name.toLocaleLowerCase("es") === reservation.dishName.toLocaleLowerCase("es"));
+  const cookAvatar = reservation.cookAvatar || matchingDish?.cookAvatar || (reservation.cookId === "dona-rosa" ? "/images/dona_rosa_mascot.jpg" : "/images/abuelita_3d_mascot.jpg");
 
   const handleSendMessage = (textToSend?: string) => {
     const text = textToSend || inputMessage;
@@ -123,11 +132,13 @@ export default function ChatModal({
 
   const handleConfirmDelivery = () => {
     const reservations = getStoredReservations();
+    const completedAt = new Date().toISOString();
     const updated = reservations.map((r) => {
       if (r.id === reservation.id) {
         return {
           ...r,
           status: "COMPLETADA" as const,
+          completedAt,
           buyerConfirmedDelivery: true,
           cookConfirmedDelivery: true,
         };
@@ -135,7 +146,12 @@ export default function ChatModal({
       return r;
     });
     saveReservations(updated);
-    setReservation((prev) => (prev ? { ...prev, status: "COMPLETADA" } : null));
+    const completedReservation = updated.find((item) => item.id === reservation.id);
+    if (completedReservation) {
+      syncOllaVerdeProgressAfterCompletion(completedReservation);
+      syncVecinoFielAfterCompletion(completedReservation);
+    }
+    setReservation((prev) => (prev ? { ...prev, status: "COMPLETADA", completedAt } : null));
 
     // System message in chat
     const sysMsg: ChatMessage = {
@@ -148,6 +164,7 @@ export default function ChatModal({
     const updatedMsgs = [...messages, sysMsg];
     setMessages(updatedMsgs);
     saveMessages(reservation.id, updatedMsgs);
+    window.setTimeout(onClose, 1200);
 
     // Open rating modal for buyer (HU-15)
     if (onOpenRatingModal) {
@@ -158,66 +175,71 @@ export default function ChatModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
-      <div className="bg-[#162119] border border-amber-600/30 text-amber-100 rounded-2xl w-full max-w-lg h-[620px] max-h-[calc(100vh-2rem)] flex flex-col shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#171912]/75 p-2 backdrop-blur-sm animate-fadeIn sm:p-5">
+      <div role="dialog" aria-modal="true" aria-labelledby="reservation-chat-title" className="relative flex h-[min(88dvh,820px)] max-h-[calc(100dvh-1rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[22px] border-[9px] border-[#55331e] bg-[linear-gradient(135deg,#9a6032,#73431f_38%,#a66b38_66%,#69401f)] p-1.5 text-[#34251a] shadow-[0_24px_80px_rgba(0,0,0,.55)] sm:rounded-[28px] sm:border-[11px] sm:p-2.5">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[13px] border border-[#d4b07d]/70 bg-[#f3e6cb]">
         {/* Header */}
-        <div className="bg-[#101712] p-4 border-b border-amber-800/40 flex items-center justify-between">
+        <div className="relative flex items-center justify-between gap-3 border-b-[5px] border-[#59351f] bg-[linear-gradient(115deg,#9a6032,#75431f_38%,#a66b38_62%,#68401f)] px-4 py-3 text-[#fff0d2] sm:px-6 sm:py-4">
+          <span aria-hidden="true" className="absolute left-2 top-2 h-2.5 w-2.5 rounded-full border border-[#4c2c1a] bg-[#d5b17d] shadow-inner" />
+          <span aria-hidden="true" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border border-[#4c2c1a] bg-[#d5b17d] shadow-inner" />
           <div className="flex min-w-0 items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#F0822D]/20 border border-[#F0822D]/40 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-[#F0822D]" />
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#f1d7ab] bg-[#f3e6cb] shadow-md sm:h-14 sm:w-14">
+              {cookAvatar ? <img src={cookAvatar} alt={`Foto de ${reservation.cookName}`} className="h-full w-full object-cover" /> : <UserRound className="m-auto h-7 w-7 text-[#80694d]" />}
             </div>
             <div className="min-w-0">
-              <h3 className="font-playfair text-base font-bold text-amber-200">
-                Chat de Reserva #{reservation.id.slice(-4)}
+              <h3 id="reservation-chat-title" className="font-['Caveat',cursive] text-xl font-bold text-[#fff0d2] sm:text-2xl">
+                {reservation.cookName}
               </h3>
-              <p className="break-words text-xs text-amber-300/80">
-                {reservation.dishName} ({reservation.portions} porción/es) — ${reservation.totalPrice.toLocaleString("es-CO")}
+              <p className="break-words text-xs text-[#f3dfbf]">
+                {reservation.dishName} · Pedido #{reservation.id.slice(-4)} · {reservation.portions} porción/es · ${reservation.totalPrice.toLocaleString("es-CO")}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-amber-300 hover:text-white p-1 rounded-full transition-colors"
+            aria-label="Cerrar conversación"
+            className="shrink-0 rounded-full border border-[#f1d7ab]/35 p-2 text-[#fff0d2] transition-colors hover:bg-[#4e321f]/50 hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Reservation Status Bar */}
-        <div className="bg-[#1C2C20] px-4 py-2.5 border-b border-amber-900/40 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#c8ab7f] bg-[#e7dbc1] px-4 py-3 text-xs sm:px-6">
           <div className="flex items-center gap-2">
             <span
               className={`w-2.5 h-2.5 rounded-full ${
                 reservation.status === "PENDIENTE"
-                  ? "bg-amber-400 animate-pulse"
+                  ? "bg-amber-500 animate-pulse"
                   : reservation.status === "COMPLETADA"
-                  ? "bg-emerald-400"
-                  : "bg-red-400"
+                  ? "bg-[#526f42]"
+                  : "bg-[#a84029]"
               }`}
             />
-            <span className="font-semibold text-amber-100">Estado: {reservation.status}</span>
+            <span className="font-semibold text-[#493323]">Estado: {reservation.status === "PENDIENTE" ? "Esperando confirmación" : reservation.status === "CONFIRMADO" ? "Pedido confirmado" : reservation.status === "COMPLETADA" ? "Pedido recibido · chat cerrado" : reservation.status === "RECHAZADA" ? "Solicitud rechazada" : "Solicitud expirada"}</span>
           </div>
 
           {reservation.status === "PENDIENTE" && timeLeftStr && (
-            <span className="text-[11px] bg-amber-950/80 border border-amber-600/50 text-amber-200 px-2.5 py-0.5 rounded-full font-mono flex items-center gap-1">
-              <Clock className="w-3 h-3 text-amber-400" />
+            <span className="flex items-center gap-1 rounded-full border border-[#d4a64a] bg-[#fff0cf] px-2.5 py-0.5 font-mono text-[11px] text-[#70430c]">
+              <Clock className="h-3 w-3 text-[#a45d19]" />
               <span>Tiempo: {timeLeftStr}</span>
             </span>
           )}
 
-          {reservation.status === "PENDIENTE" && (
+          {reservation.status === "CONFIRMADO" && currentUser.role === "comprador" && (
             <button
               onClick={handleConfirmDelivery}
-              className="bg-[#62B869] hover:bg-[#4E9A54] text-white px-3 py-1 rounded-lg text-xs font-semibold shadow transition-all flex items-center gap-1"
+              className="flex items-center gap-1 rounded-lg bg-[#526f42] px-3 py-2 text-xs font-semibold text-white shadow transition-all hover:bg-[#40572e]"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Confirmar Entrega</span>
+              <span>Marcar como recibido y cerrar chat</span>
             </button>
           )}
+          {reservation.status === "PENDIENTE" && <span className="text-[11px] text-[#725b42]">La cocinera debe confirmar antes de preparar el pedido.</span>}
         </div>
 
         {/* Chat Messages */}
-        <div className="min-h-0 flex-1 p-4 overflow-y-auto space-y-3 bg-[#121A14]">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[linear-gradient(135deg,#e8dfca,#f5ecdb_48%,#e6dcc7)] p-4 sm:p-6">
           {messages.map((msg) => {
             const isMe = msg.sender === (currentUser.name || currentUser.commercialName || currentUser.email);
             const isSys = msg.sender === "Sistema OllaCercana";
@@ -225,7 +247,7 @@ export default function ChatModal({
             if (isSys) {
               return (
                 <div key={msg.id} className="text-center my-2">
-                  <span className="inline-block bg-emerald-950/80 border border-emerald-600/40 text-emerald-200 text-xs px-3 py-1 rounded-full">
+                  <span className="inline-block rounded-full border border-[#82996b] bg-[#e4efd8] px-3 py-1 text-xs text-[#40572e]">
                     {msg.text}
                   </span>
                 </div>
@@ -237,14 +259,14 @@ export default function ChatModal({
                 key={msg.id}
                 className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
               >
-                <div className="text-[10px] text-amber-400/60 mb-0.5 px-1 font-semibold">
+                <div className="mb-0.5 px-1 text-[10px] font-semibold text-[#80694d]">
                   {msg.sender} • {msg.timestamp}
                 </div>
                 <div
-                  className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[75%] ${
                     isMe
-                      ? "bg-gradient-to-r from-[#F0822D] to-[#E06F1A] text-white rounded-tr-none shadow-md font-medium"
-                      : "bg-[#1B291F] border border-amber-800/40 text-amber-100 rounded-tl-none shadow-md"
+                      ? "rounded-tr-none bg-[#a8432a] font-medium text-white shadow-md"
+                      : "rounded-tl-none border border-[#c8ab7f] bg-[#fffaf0] text-[#34251a] shadow-md"
                   }`}
                 >
                   {msg.text}
@@ -257,19 +279,19 @@ export default function ChatModal({
 
         {/* Read-Only Banner (HU-23) */}
         {isReadOnly ? (
-          <div className="p-3 bg-amber-950/90 border-t border-amber-800/50 text-amber-200 text-xs text-center font-medium flex items-center justify-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-amber-400" />
+          <div className="flex items-center justify-center gap-1.5 border-t border-[#a8bc93] bg-[#e4efd8] p-3 text-center text-xs font-medium text-[#40572e]">
+            <Lock className="h-3.5 w-3.5 text-[#526f42]" />
             <span>Esta conversación ha finalizado y se encuentra en modo solo lectura. (HU-23)</span>
           </div>
         ) : (
-          <div className="p-3 bg-[#101712] border-t border-amber-800/40 space-y-2">
+          <div className="space-y-2 border-t border-[#c8ab7f] bg-[#f3e6cb] p-3 sm:p-4">
             {/* Quick replies */}
             <div className="flex gap-2 overflow-x-auto pb-1 text-[11px] scrollbar-none">
               {["Ya salí a entregar", "Estoy en la portería", "Confirmo pago recibido", "¡Muchas gracias!"].map((quick) => (
                 <button
                   key={quick}
                   onClick={() => handleSendMessage(quick)}
-                  className="bg-[#1C2C20] hover:bg-[#253A2A] text-amber-200 border border-amber-700/40 px-2.5 py-1 rounded-full whitespace-nowrap transition-all font-medium"
+                  className="whitespace-nowrap rounded-full border border-[#75865a]/60 bg-[#dce4ce] px-2.5 py-1 text-[#42542e] transition-all hover:bg-[#cdd9b9] font-medium"
                 >
                   {quick}
                 </button>
@@ -282,18 +304,18 @@ export default function ChatModal({
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="flex gap-2"
+                className="flex gap-2"
             >
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Escribe un mensaje..."
-                className="flex-1 bg-[#1A261D] border border-amber-700/50 rounded-xl px-3.5 py-2 text-xs text-white placeholder-amber-500/40 focus:outline-none focus:border-[#F0822D]"
+                className="min-w-0 flex-1 rounded-xl border border-[#b89a6f] bg-white px-3.5 py-3 text-sm text-[#30251b] placeholder:text-[#9b8668] focus:outline-none focus:ring-2 focus:ring-[#526f42]"
               />
               <button
                 type="submit"
-                className="bg-[#F0822D] hover:bg-[#E06F1A] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow flex items-center gap-1"
+                className="flex items-center gap-1 rounded-xl bg-[#a8432a] px-4 py-2 text-sm font-bold text-white shadow transition-all hover:bg-[#8e3522]"
               >
                 <span>Enviar</span>
                 <Send className="w-3.5 h-3.5" />
@@ -301,6 +323,7 @@ export default function ChatModal({
             </form>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

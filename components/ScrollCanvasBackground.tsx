@@ -9,12 +9,12 @@ interface ScrollCanvasBackgroundProps {
 
 const getFramePath = (index: number) => {
   const padded = String(index).padStart(3, "0");
-  return `/frames-webp/frame_${padded}.webp`;
+  return `/frames/frame_${padded}.png`;
 };
 
 export default function ScrollCanvasBackground({
   scrollContainerRef,
-  totalFrames = 296,
+  totalFrames = 150,
 }: ScrollCanvasBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(totalFrames).fill(null));
@@ -133,6 +133,8 @@ export default function ScrollCanvasBackground({
     ctx.save();
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, viewportWidth, viewportHeight);
+    ctx.fillStyle = "#14110f";
+    ctx.fillRect(0, 0, viewportWidth, viewportHeight);
 
     // Calculate aspect-ratio cover fill (no distortion, no letterboxing)
     const imgRatio = img.naturalWidth / img.naturalHeight;

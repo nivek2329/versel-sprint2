@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import BrandLogo from "@/components/BrandLogo";
 import AnimatedKitchenBackground from "@/components/AnimatedKitchenBackground";
 import AccountNav from "@/components/AccountNav";
@@ -16,6 +17,9 @@ import {
   RefreshCw,
   HelpCircle,
   Home,
+  Heart,
+  Award,
+  ArrowRight,
 } from "lucide-react";
 
 interface UserProfile {
@@ -28,6 +32,7 @@ interface UserProfile {
   bio?: string;
   residentialComplex?: string;
   paymentMethods: string[];
+  badges?: string[];
   isLoggedIn: boolean;
   avatar?: string;
   kitchenPhoto?: string;
@@ -58,13 +63,13 @@ export default function PerfilPage() {
   useEffect(() => {
     const savedUserJson = localStorage.getItem("ollacercana_user");
     if (!savedUserJson) {
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
       return;
     }
     try {
       const parsed: UserProfile = JSON.parse(savedUserJson);
       if (!parsed.isLoggedIn) {
-        router.push("/cuenta");
+        router.replace("/cuenta/sesion-expirada");
         return;
       }
       setUser(parsed);
@@ -76,7 +81,7 @@ export default function PerfilPage() {
       setCheckingSession(false);
     } catch (e) {
       console.error(e);
-      router.push("/cuenta");
+      router.replace("/cuenta/sesion-expirada");
     }
   }, [router]);
 
@@ -154,14 +159,14 @@ export default function PerfilPage() {
 
   if (checkingSession || !user) {
     return (
-      <main className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
+      <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] flex items-center justify-center">
         <p className="text-stone-400 text-sm font-semibold">Cargando...</p>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
+    <main data-theme-page className="relative min-h-screen w-full bg-[#14110f] text-[#f4efe6] font-['Outfit',sans-serif] overflow-x-hidden flex flex-col justify-between selection:bg-[#F0822D] selection:text-white">
       <AnimatedKitchenBackground />
 
       <header className="relative z-10 w-full pt-10 pb-6 px-6 flex flex-col items-center justify-center text-center">
@@ -173,6 +178,40 @@ export default function PerfilPage() {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col items-center justify-center">
         <div className="w-full max-w-4xl bg-black/75 backdrop-blur-xl border-2 border-[#8B5E34]/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/60 space-y-8 my-6">
           <AccountNav user={user} current="perfil" />
+
+          {/* Banner de Insignia Oficial: Vecino Fiel (HU-21) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#291b12] via-[#20150d] to-[#291b12] border border-[#a86538]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3.5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-amber-500/60 bg-amber-950/60 text-amber-300 shadow-inner">
+                <Heart className="h-6 w-6 text-[#c05621] fill-[#c05621]/40" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Insignia Oficial · HU-21</span>
+                  {user.badges?.includes("Vecino Fiel") && (
+                    <span className="bg-emerald-950 text-emerald-300 border border-emerald-500/50 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                      🌟 Activo en Perfil
+                    </span>
+                  )}
+                </div>
+                <h4 className="font-['Caveat',cursive] text-2xl font-bold text-amber-100 leading-tight">
+                  Pasaporte de Vecino Fiel
+                </h4>
+                <p className="text-xs text-stone-300">
+                  {user.badges?.includes("Vecino Fiel")
+                    ? "¡Tu perfil luce la insignia oficial por tu racha activa de consumo local!"
+                    : "Completa 3 pedidos este mes con una misma cocinera para ganar la insignia oficial."}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/vecino-fiel"
+              className="shrink-0 bg-[#c05621] hover:bg-[#d9672e] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+            >
+              <span>Ver mi Expediente</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
 
           <form onSubmit={handleProfileSave} className="space-y-4 text-left border-t border-white/10 pt-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -237,13 +276,15 @@ export default function PerfilPage() {
               <label className="text-xs font-semibold text-stone-300 flex items-center gap-1">
                 <CreditCard className="w-3.5 h-3.5 text-[#F0822D]" /> Medios de Pago
               </label>
-              <div className="flex flex-wrap gap-3">
-                {["Efectivo", "Nequi", "Daviplata"].map((method) => {
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {["Efectivo", "Nequi", "Llaves"].map((method) => {
                   const isSelected = selectedPaymentMethods.includes(method);
+                  const imageSrc = method === "Nequi" ? "/images/nequi.jpg" : method === "Llaves" ? "/images/llaves.png" : "/images/efectivo.png";
                   return (
                     <button
                       type="button"
                       key={method}
+                      aria-pressed={isSelected}
                       onClick={() => {
                         if (isSelected) {
                           setSelectedPaymentMethods(selectedPaymentMethods.filter((m) => m !== method));
@@ -251,14 +292,20 @@ export default function PerfilPage() {
                           setSelectedPaymentMethods([...selectedPaymentMethods, method]);
                         }
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      className={`flex min-h-[72px] items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-[#F0822D]/20 border-[#F0822D] text-[#F0822D]"
-                          : "bg-black/40 border-white/20 text-stone-400"
+                          ? "bg-[#F0822D]/15 border-[#F0822D] text-[#fff0d2] shadow-[0_0_0_1px_rgba(240,130,45,.15)]"
+                          : "bg-black/30 border-white/20 text-stone-300 hover:border-[#F0822D]/70 hover:bg-black/45"
                       }`}
                     >
-                      {isSelected ? "✓ " : ""}
-                      {method}
+                      <span className={`relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg p-1 ${method === "Llaves" ? "bg-[#32005f]" : "bg-white"}`}>
+                        <Image src={imageSrc} alt={`${method} como medio de pago`} fill sizes="44px" className="object-contain p-1" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold">{method === "Nequi" ? "Nequi" : method}</span>
+                        <span className={`mt-0.5 block text-[10px] font-medium ${isSelected ? "text-[#f3dfbf]" : "text-stone-400"}`}>{method === "Llaves" ? "Bre-B · transferencia" : method === "Nequi" ? "Transferencia digital" : "Pago al recoger"}</span>
+                      </span>
+                      <span aria-hidden="true" className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] ${isSelected ? "border-[#f0822d] bg-[#f0822d] text-white" : "border-white/35 text-transparent"}`}>✓</span>
                     </button>
                   );
                 })}

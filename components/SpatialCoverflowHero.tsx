@@ -21,34 +21,32 @@ import {
   ChefHat,
   X,
   Flame,
-  ShieldCheck,
-  Check,
   RotateCcw,
   ArrowRight,
   Soup,
-  Eye,
   HelpCircle,
   ShoppingBag,
-  MessageCircle,
+  UsersRound,
+  Building2,
   Award,
   Star,
-  DollarSign,
-  TrendingUp,
-  Quote,
   LogIn,
   UserPlus,
 } from "lucide-react";
 
 // Paleta OllaCercana
 const ORANGE = "#F0822D";
-const GREEN = "#62B869";
-const YELLOW = "#F4C430";
-const RED_TERRA = "#C84B31";
-const COAL = "#2B2117";
-
 const MONO = "font-['Courier_New',monospace]";
 const HAND = "font-['Caveat',cursive]";
 const SERIF = "font-['Playfair_Display',serif]";
+
+function PhotoStamp({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  return (
+    <div className={`relative shrink-0 overflow-hidden rounded-xl border-2 border-[#D9B68C] bg-[#FAF3E7] shadow-[2px_3px_0_rgba(43,33,23,.16)] ${className}`}>
+      <Image src={src} alt={alt} fill sizes="80px" className="object-cover" />
+    </div>
+  );
+}
 
 export interface SpatialDish {
   id: string;
@@ -105,7 +103,6 @@ export interface CarouselScreen {
   id: string;
   type: "map" | "dish" | "mascot" | "cook" | "buyer";
   tabLabel: string;
-  tabIcon: string;
   badge: string;
   categoryTag: string;
   title: string;
@@ -126,7 +123,6 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     id: "screen-map",
     type: "map",
     tabLabel: "Ruta del Barrio",
-    tabIcon: "📍",
     badge: "Vecinos en Ruta",
     categoryTag: "GEOLOCALIZACIÓN VECINAL · A PASO LENTO",
     title: "Vecinos Explorando el Barrio",
@@ -136,7 +132,7 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     overlaySub: "10 ollas activas hoy",
     description:
       "Descubre qué vecinos están preparando almuerzo casero a pocas cuadras. Consulta minutos a pie y recoge en portería con total confianza.",
-    highlightLabel: "📍 ENCUENTRO EN PORTERÍA",
+    highlightLabel: "ENCUENTRO EN PORTERÍA",
     highlightValue: "A 4 – 12 min a pie",
     highlightPill: "Sin Domiciliarios",
     actionLabel: "Explorar Mapa de Cocineras",
@@ -146,7 +142,6 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     id: "screen-dish",
     type: "dish",
     tabLabel: "Plato del Día",
-    tabIcon: "🍲",
     badge: "Sazón de la Casa",
     categoryTag: "FOGÓN TRADICIONAL · RECETA DEL DÍA",
     title: "Ajiaco Santafereño de la Casa",
@@ -156,7 +151,7 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     overlaySub: "Solo 4 porciones hoy",
     description:
       "Una muestra de la comida casera hecha a fuego lento por las manos de nuestras familias vecinas. Para descubrir todas las ollas del día, abre El Libretón.",
-    highlightLabel: "🍲 COMIDA DE VERDAD",
+    highlightLabel: "COMIDA DE VERDAD",
     highlightValue: "A 350 m · 4 min a pie",
     highlightPill: "Recién Servido",
     actionLabel: "Apartar esta porción",
@@ -165,17 +160,16 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     id: "screen-mascot",
     type: "mascot",
     tabLabel: "Nuestro Equipo",
-    tabIcon: "👥",
-    badge: "♡ Creadores del Proyecto",
+    badge: "Creadores del Proyecto",
     categoryTag: "QUIÉNES SOMOS · EQUIPO COMUNITARIO",
     title: "Nuestro Equipo y Comunidad",
     subtitle: "Presentamos a quienes creamos OllaCercana",
     image: "/images/comunidad/kevin-equipo.jpg",
     overlayMetric: "100% Real",
-    overlaySub: "Vecinos del barrio ♡",
+    overlaySub: "Vecinos del barrio",
     description:
       "¡Hola! Somos los creadores de OllaCercana. Diseñamos este espacio para unir a los vecinos a través de la comida casera de verdad, apoyando a familias locales y fortaleciendo los lazos del conjunto.",
-    highlightLabel: "👥 EQUIPO COMPROMETIDO",
+    highlightLabel: "EQUIPO COMPROMETIDO",
     highlightValue: "5 Vecinos Fundadores",
     highlightPill: "0% Comisiones",
     actionLabel: "Conocer la Comunidad",
@@ -185,17 +179,16 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     id: "screen-cook",
     type: "cook",
     tabLabel: "Modo Cocinero",
-    tabIcon: "👨‍🍳",
     badge: "Sello Olla Verde",
     categoryTag: "ECONOMÍA FAMILIAR · MODO COCINERO",
     title: "Tu Cocina, Tus Porciones",
     subtitle: "Kevin y vecinos cocinando en el barrio",
     image: "/images/comunidad/vecino_1.jpg",
     overlayMetric: "0% Comisión",
-    overlaySub: "⭐ 4.9 Reputación Vecinal",
+    overlaySub: "4.9 Reputación Vecinal",
     description:
       "¿Cocinaste de más en casa? Sube tus platos en 1 minuto. Los platos expiran a las 4 horas para asegurar frescura total sin presiones ni cobros de plataforma.",
-    highlightLabel: "🌱 APOYO AL HOGAR",
+    highlightLabel: "APOYO AL HOGAR",
     highlightValue: "Todo el pago va directo a ti",
     highlightPill: "Ingreso Vecinal",
     actionLabel: "Conocer Modo Cocinero",
@@ -205,7 +198,6 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     id: "screen-buyer",
     type: "buyer",
     tabLabel: "Vecino Fiel",
-    tabIcon: "🛍️",
     badge: "Comunidad Vecinal",
     categoryTag: "PASAPORTE VECINAL · PEDIDOS & FIDELIDAD",
     title: "Vecinos Comensales & Fidelidad",
@@ -215,7 +207,7 @@ export const CAROUSEL_SCREENS: CarouselScreen[] = [
     overlaySub: "5% de descuento por racha",
     description:
       "Aparta tu plato con 1 toque sin tarjetas bancarias. Chatea directamente con quien cocina, acuerda la entrega en portería y acumula sellos de fidelidad.",
-    highlightLabel: "🤝 TRATO DIRECTO",
+    highlightLabel: "TRATO DIRECTO",
     highlightValue: "Pagas directo al recibir",
     highlightPill: "Chat Interno",
     actionLabel: "Ver Mis Reservas",
@@ -272,7 +264,7 @@ export default function SpatialCoverflowHero() {
     if (e) e.stopPropagation();
     setFavorites((prev) => {
       const next = !prev[id];
-      showToast(next ? "❤️ ¡Guardado en tus favoritos!" : "Retirado de tus favoritos.");
+      showToast(next ? "¡Guardado en tus favoritos!" : "Retirado de tus favoritos.");
       return { ...prev, [id]: next };
     });
   };
@@ -303,7 +295,7 @@ export default function SpatialCoverflowHero() {
         audioCtxRef.current = null;
       }
       setIsAudioSimmering(false);
-      showToast("🔇 Sonido de cocina silenciado");
+      showToast("Sonido de cocina silenciado");
       return;
     }
 
@@ -334,7 +326,7 @@ export default function SpatialCoverflowHero() {
       whiteNoise.start();
 
       setIsAudioSimmering(true);
-      showToast("🍲 Sonido ambiente activado: hervor y vapor en la cocina");
+      showToast("Sonido ambiente activado: hervor y vapor en la cocina");
     } catch {
       showToast("Audio no disponible en este navegador");
     }
@@ -483,7 +475,7 @@ export default function SpatialCoverflowHero() {
       {/* ========================================================================= */}
       <div className="relative z-20 text-center px-4 mb-3 pt-1">
         <p className={`${HAND} text-xl sm:text-2xl font-bold tracking-wide text-[#F4C430] mb-0.5`}>
-          🌿 Quiénes somos y cómo alimentamos el barrio 🌿
+          Quiénes somos y cómo alimentamos el barrio
         </p>
         <h2 className={`${SERIF} text-3xl sm:text-4xl lg:text-5xl text-[#FAF3E7] font-bold tracking-tight leading-tight`}>
           Lo cercano{" "}
@@ -497,20 +489,33 @@ export default function SpatialCoverflowHero() {
 
         {/* Selector de Pantallas del Carrusel (Estilo Pestañas de Cuaderno Artesanal) */}
         <div className="mt-4 mb-0 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 rounded-full border-2 border-[#D9B68C]/60 bg-[#2B2117]/85 p-1.5 shadow-xl max-w-fit mx-auto relative z-40 pointer-events-auto backdrop-blur-md">
-          {CAROUSEL_SCREENS.map((screen, idx) => (
-            <button
-              key={screen.id}
-              type="button"
-              onClick={() => setActiveIndex(idx)}
-              className={`rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                activeIndex === idx
-                  ? "bg-gradient-to-r from-[#E66A1F] to-[#D85718] text-white shadow-md scale-105"
-                  : "text-[#E2CEB1] hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <span>{screen.tabIcon} {screen.tabLabel}</span>
-            </button>
-          ))}
+          {CAROUSEL_SCREENS.map((screen, idx) => {
+            const TabIcon = screen.type === "map"
+              ? MapPin
+              : screen.type === "dish"
+                ? Soup
+                : screen.type === "mascot"
+                  ? UsersRound
+                  : screen.type === "cook"
+                    ? ChefHat
+                    : ShoppingBag;
+
+            return (
+              <button
+                key={screen.id}
+                type="button"
+                onClick={() => setActiveIndex(idx)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  activeIndex === idx
+                    ? "bg-gradient-to-r from-[#E66A1F] to-[#D85718] text-white shadow-md scale-105"
+                    : "text-[#E2CEB1] hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <TabIcon className="h-4 w-4" aria-hidden="true" />
+                <span>{screen.tabLabel}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -588,7 +593,7 @@ export default function SpatialCoverflowHero() {
                         {/* Badges y Botones superiores sobre la imagen */}
                         <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
                           <span className="rounded-full bg-[#FAF3E7]/95 border border-[#D9B68C] px-3 py-1 text-[10px] font-bold text-[#A84029] shadow-xs backdrop-blur-xs flex items-center gap-1">
-                            <span>♡</span> {screen.badge}
+                            <span>{screen.badge}</span>
                           </span>
 
                           <div className="flex items-center gap-1.5">
@@ -787,7 +792,7 @@ export default function SpatialCoverflowHero() {
                   if (currentScreen.type === "dish") {
                     handleToggleFavorite("dish-ajiaco-teaser", e);
                   } else {
-                    showToast("✨ ¡Sección explorada con éxito!");
+                    showToast("¡Sección explorada con éxito!");
                   }
                 }}
                 className={`flex h-7 w-7 items-center justify-center rounded-full border border-[#D9B68C] ${
@@ -834,16 +839,14 @@ export default function SpatialCoverflowHero() {
       {/* 4. PILARES DE OLLACERCANA: INSIGNIAS, RESEÑAS, ECONOMÍA Y CONFIANZA       */}
       {/* ========================================================================= */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-7 sm:mt-8 mb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 text-left">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 text-left font-['Patrick_Hand',cursive]">
           
           {/* Card 1: Valor Diferenciador - Sello Olla Verde */}
           <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 sm:p-7 shadow-[0_16px_36px_rgba(43,33,23,0.18)] text-[#2B2117] flex flex-col justify-between min-h-[300px] transition-all duration-300 hover:border-[#E66A1F] hover:-translate-y-1 group">
             <div>
               <div className="flex items-center gap-2.5 border-b border-[#D9B68C] pb-3 mb-3.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F3DDC2] text-[#A84029]">
-                  <Award className="h-4.5 w-4.5 text-[#A84029]" />
-                </div>
-                <span className={`${MONO} text-xs font-bold text-[#A84029] uppercase tracking-wider`}>
+                <PhotoStamp src="https://images.unsplash.com/photo-1715828202780-915fd3571413?auto=format&fit=crop&w=160&h=160&q=80" alt="Cocinera preparando un plato casero" className="h-16 w-16" />
+                <span className="text-sm font-bold text-[#A84029] uppercase tracking-wide">
                   VALOR DIFERENCIADOR
                 </span>
               </div>
@@ -853,13 +856,13 @@ export default function SpatialCoverflowHero() {
                   <Image src="/images/sello_olla_verde.png" alt="Sello Olla Verde" fill className="object-contain" />
                 </div>
                 <div className="leading-tight">
-                  <span className="text-sm sm:text-base font-extrabold text-[#3E5326] flex items-center gap-1.5">
+                  <span className="text-base sm:text-lg font-bold text-[#3E5326] flex items-center gap-1.5">
                     Sello Olla Verde · 7 PT
                   </span>
-                  <span className="text-[11px] font-bold text-[#8A6D4B] block mt-0.5">
+                  <span className="text-sm font-bold text-[#8A6D4B] block mt-0.5">
                     Insignia de Excelencia Vecinal
                   </span>
-                  <p className="text-xs sm:text-[13px] text-[#5B4A38] mt-2 leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#5B4A38] mt-2 leading-relaxed">
                     Premio a cocineras que venden el 100% de sus porciones 7 días seguidos. Cero desperdicio y garantía de comida fresca en el conjunto.
                   </p>
                 </div>
@@ -870,8 +873,8 @@ export default function SpatialCoverflowHero() {
               <span className="flex items-center gap-1 font-bold text-[#2B2117]">
                 <Star className="h-3.5 w-3.5 text-[#F4C430] fill-[#F4C430]" /> Cocineras con 4.8+
               </span>
-              <span className="rounded-full bg-[#DCE4CE] border border-[#75865A] px-2.5 py-0.5 text-[11px] font-bold text-[#42542E]">
-                ⭐ Sazón Verificada
+              <span className="rounded-full bg-[#DCE4CE] border border-[#75865A] px-2.5 py-0.5 text-xs font-bold text-[#42542E]">
+                Sazón Verificada
               </span>
             </div>
           </div>
@@ -880,14 +883,12 @@ export default function SpatialCoverflowHero() {
           <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 sm:p-7 shadow-[0_16px_36px_rgba(43,33,23,0.18)] text-[#2B2117] flex flex-col justify-between min-h-[300px] transition-all duration-300 hover:border-[#E66A1F] hover:-translate-y-1 group">
             <div>
               <div className="flex items-center gap-2.5 border-b border-[#D9B68C] pb-3 mb-3.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DCE4CE] text-[#3E5326]">
-                  <Quote className="h-4.5 w-4.5 text-[#3E5326]" />
-                </div>
-                <span className={`${MONO} text-xs font-bold text-[#3E5326] uppercase tracking-wider`}>
+                <PhotoStamp src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=160&h=160&q=80" alt="Vecinos compartiendo una comida" className="h-16 w-16" />
+                <span className="text-sm font-bold text-[#3E5326] uppercase tracking-wide">
                   RESEÑAS DEL BARRIO
                 </span>
               </div>
-              <p className={`${SERIF} text-sm sm:text-base text-[#2B2117] italic leading-relaxed mt-2`}>
+              <p className="text-base sm:text-lg text-[#2B2117] italic leading-relaxed mt-2">
                 &ldquo;El ajiaco tradicional sabe idéntico al de mi abuela. Llegó humeante y calientito a la portería de la Torre 2 en solo 5 minutos.&rdquo;
               </p>
               <div className="mt-3 flex items-center gap-1.5">
@@ -906,7 +907,9 @@ export default function SpatialCoverflowHero() {
                   <span className="text-[10px] text-[#5B4A38] block">Vecino · Conjunto San Luis</span>
                 </div>
               </div>
-              <span className="text-sm tracking-widest text-[#F4C430]">★★★★★</span>
+              <span className="inline-flex items-center gap-0.5 text-[#F4C430]" aria-label="Calificación: 5 de 5">
+                {Array.from({ length: 5 }, (_, index) => <Star key={index} className="h-4 w-4 fill-current" />)}
+              </span>
             </div>
           </div>
 
@@ -914,10 +917,8 @@ export default function SpatialCoverflowHero() {
           <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 sm:p-7 shadow-[0_16px_36px_rgba(43,33,23,0.18)] text-[#2B2117] flex flex-col justify-between min-h-[300px] transition-all duration-300 hover:border-[#E66A1F] hover:-translate-y-1 group">
             <div>
               <div className="flex items-center gap-2.5 border-b border-[#D9B68C] pb-3 mb-3.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#DCE4CE] text-[#3E5326]">
-                  <TrendingUp className="h-4.5 w-4.5 text-[#3E5326]" />
-                </div>
-                <span className={`${MONO} text-xs font-bold text-[#3E5326] uppercase tracking-wider`}>
+                <PhotoStamp src="https://images.unsplash.com/photo-1767628805149-ce974eb441c5?auto=format&fit=crop&w=160&h=160&q=80" alt="Comerciantes y vecinos en un mercado local" className="h-16 w-16" />
+                <span className="text-sm font-bold text-[#3E5326] uppercase tracking-wide">
                   ECONOMÍA DEL BARRIO
                 </span>
               </div>
@@ -942,10 +943,8 @@ export default function SpatialCoverflowHero() {
           <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 sm:p-7 shadow-[0_16px_36px_rgba(43,33,23,0.18)] text-[#2B2117] flex flex-col justify-between min-h-[300px] transition-all duration-300 hover:border-[#E66A1F] hover:-translate-y-1 group">
             <div>
               <div className="flex items-center gap-2.5 border-b border-[#D9B68C] pb-3 mb-3.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F3DDC2] text-[#A84029]">
-                  <ShieldCheck className="h-4.5 w-4.5 text-[#A84029]" />
-                </div>
-                <span className={`${MONO} text-xs font-bold text-[#A84029] uppercase tracking-wider`}>
+                <PhotoStamp src="https://images.unsplash.com/photo-1773741106710-0ad118f18933?auto=format&fit=crop&w=160&h=160&q=80" alt="Viviendas y edificios del barrio" className="h-16 w-16" />
+                <span className="text-sm font-bold text-[#A84029] uppercase tracking-wide">
                   CONFIANZA VECINAL
                 </span>
               </div>
@@ -964,7 +963,7 @@ export default function SpatialCoverflowHero() {
                 </li>
               </ul>
             </div>
-            <div className="mt-4 pt-3 border-t border-[#D9B68C] text-xs font-mono font-bold text-[#A84029] text-center">
+            <div className="mt-4 pt-3 border-t border-[#D9B68C] text-sm font-bold text-[#A84029] text-center">
               100% Comunitario y Hecho en el Barrio
             </div>
           </div>
@@ -974,12 +973,12 @@ export default function SpatialCoverflowHero() {
       {/* ========================================================================= */}
       {/* 4. ¿QUÉ PUEDES HACER EN OLLACERCANA? (COMPRADOR VS COCINERA)               */}
       {/* ========================================================================= */}
-      <section id="community-guide" className="relative z-30 max-w-6xl scroll-mt-6 mx-auto px-4 mt-12 pt-8 border-t border-white/10">
+      <section id="community-guide" className="relative z-30 max-w-6xl scroll-mt-6 mx-auto px-4 mt-12 pt-8 border-t border-white/10 font-['Patrick_Hand',cursive]">
         <div className="text-center mb-6">
-          <p className={`${MONO} text-[10px] font-bold tracking-[0.25em] text-[#F4C430] uppercase mb-1`}>
+          <p className="text-sm font-bold tracking-[0.18em] text-[#F4C430] uppercase mb-1">
             GUÍA DE LA COMUNIDAD · CERO COMPLICACIONES
           </p>
-          <h3 className={`${SERIF} text-2xl sm:text-3xl lg:text-4xl font-bold text-[#FAF3E7]`}>
+          <h3 className={`${HAND} text-3xl sm:text-4xl lg:text-5xl font-bold text-[#FAF3E7]`}>
             ¿Cómo se vive <span style={{ color: ORANGE }}>OllaCercana</span>?
           </h3>
           <p className="mt-1 text-xs sm:text-sm text-[#FAF3E7]/80 max-w-xl mx-auto">
@@ -1053,14 +1052,12 @@ export default function SpatialCoverflowHero() {
               <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 shadow-[0_12px_28px_rgba(43,33,23,0.14)] flex flex-col justify-between hover:border-[#E66A1F] transition-all hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between border-b border-[#D9B68C]/70 pb-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3DDC2] text-[#A84029]">
-                      <Soup className="h-5 w-5" />
-                    </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#A84029] uppercase tracking-wider bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]`}>
+                    <PhotoStamp src="https://images.unsplash.com/photo-1510431198580-7727c9fa1e3a?auto=format&fit=crop&w=160&h=160&q=80" alt="Sopa casera servida en un plato" className="h-20 w-20" />
+                    <span className="text-xs font-bold text-[#A84029] uppercase tracking-wide bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]">
                       1. EN EL MENÚ DEL DÍA
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Explora & Aparta tu Porción</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Explora & Aparta tu Porción</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#E66A1F] font-bold mt-0.5">✦</span>
@@ -1089,14 +1086,12 @@ export default function SpatialCoverflowHero() {
               <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 shadow-[0_12px_28px_rgba(43,33,23,0.14)] flex flex-col justify-between hover:border-[#62B869] transition-all hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between border-b border-[#D9B68C]/70 pb-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DCE4CE] text-[#3E5326]">
-                      <MapPin className="h-5 w-5" />
-                    </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#3E5326] uppercase tracking-wider bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]`}>
+                    <PhotoStamp src="https://images.unsplash.com/photo-1771360292262-18411e2b2f8b?auto=format&fit=crop&w=160&h=160&q=80" alt="Persona consultando su teléfono mientras camina" className="h-20 w-20" />
+                    <span className="text-xs font-bold text-[#3E5326] uppercase tracking-wide bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]">
                       2. EN EL MAPA DE COCINERAS
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Encuentra Quién Cocina Cerca</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Encuentra Quién Cocina Cerca</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#3E5326] font-bold mt-0.5">✦</span>
@@ -1125,14 +1120,12 @@ export default function SpatialCoverflowHero() {
               <div className="rounded-3xl border-2 border-[#D9B68C] bg-[#FBF5E8] p-6 shadow-[0_12px_28px_rgba(43,33,23,0.14)] flex flex-col justify-between hover:border-[#E66A1F] transition-all hover:-translate-y-1">
                 <div>
                   <div className="flex items-center justify-between border-b border-[#D9B68C]/70 pb-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3DDC2] text-[#A84029]">
-                      <MessageCircle className="h-5 w-5" />
-                    </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#A84029] uppercase tracking-wider bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]`}>
+                    <PhotoStamp src="https://images.unsplash.com/photo-1721180672611-eb0489be150f?auto=format&fit=crop&w=160&h=160&q=80" alt="Personas compartiendo comida en una mesa" className="h-20 w-20" />
+                    <span className="text-xs font-bold text-[#A84029] uppercase tracking-wide bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]">
                       3. EN TU PERFIL & PEDIDOS
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Coordina, Recoge & Paga</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Coordina, Recoge & Paga</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#E66A1F] font-bold mt-0.5">✦</span>
@@ -1173,11 +1166,11 @@ export default function SpatialCoverflowHero() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DCE4CE] text-[#3E5326]">
                       <Flame className="h-5 w-5" />
                     </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#3E5326] uppercase tracking-wider bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]`}>
+                    <span className="text-xs font-bold text-[#3E5326] uppercase tracking-wide bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]">
                       1. EN TU COCINA / PUBLICAR
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Comparte lo que Sobró</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Comparte lo que Sobró</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#3E5326] font-bold mt-0.5">✦</span>
@@ -1209,11 +1202,11 @@ export default function SpatialCoverflowHero() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3DDC2] text-[#A84029]">
                       <Clock className="h-5 w-5" />
                     </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#A84029] uppercase tracking-wider bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]`}>
+                    <span className="text-xs font-bold text-[#A84029] uppercase tracking-wide bg-[#F3DDC2] px-2.5 py-0.5 rounded-full border border-[#D9B68C]">
                       2. GESTIÓN DE RESERVAS
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Confirmación sin Fricción</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Confirmación sin Fricción</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#E66A1F] font-bold mt-0.5">✦</span>
@@ -1245,11 +1238,11 @@ export default function SpatialCoverflowHero() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DCE4CE] text-[#3E5326]">
                       <Award className="h-5 w-5" />
                     </div>
-                    <span className={`${MONO} text-[10px] font-bold text-[#3E5326] uppercase tracking-wider bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]`}>
+                    <span className="text-xs font-bold text-[#3E5326] uppercase tracking-wide bg-[#DCE4CE] px-2.5 py-0.5 rounded-full border border-[#75865A]">
                       3. INSIGNIAS & REPUTACIÓN
                     </span>
                   </div>
-                  <h4 className={`${SERIF} text-lg font-bold text-[#2B2117] mt-1`}>Gana el Sello Olla Verde</h4>
+                  <h4 className={`${HAND} text-xl sm:text-2xl font-bold text-[#2B2117] mt-1`}>Gana el Sello Olla Verde</h4>
                   <ul className="mt-3 space-y-2 text-xs sm:text-[13px] text-[#5B4A38] leading-relaxed">
                     <li className="flex items-start gap-2">
                       <span className="text-[#3E5326] font-bold mt-0.5">✦</span>
@@ -1289,7 +1282,7 @@ export default function SpatialCoverflowHero() {
                 <HelpCircle className="h-6 w-6" />
               </span>
               <div>
-                <h4 className={`${SERIF} text-lg sm:text-xl font-bold text-[#2B2117]`}>Centro de Ayuda de OllaCercana</h4>
+                <h4 className={`${HAND} text-2xl sm:text-3xl font-bold text-[#2B2117]`}>Centro de Ayuda de OllaCercana</h4>
                 <p className="text-xs sm:text-sm text-[#5B4A38]">¿Tienes dudas de cómo funciona o pasó algo con tu pedido?</p>
               </div>
             </div>
@@ -1316,7 +1309,7 @@ export default function SpatialCoverflowHero() {
                   className="w-full flex items-center justify-between p-3.5 sm:p-4 text-left text-xs sm:text-sm font-bold text-[#2B2117] hover:text-[#E66A1F] transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
-                  <span className="text-[#E66A1F] text-lg font-mono ml-2 font-black">
+                  <span className="text-[#E66A1F] text-lg ml-2 font-black">
                     {selectedFaq === idx ? "−" : "+"}
                   </span>
                 </button>
@@ -1351,13 +1344,13 @@ export default function SpatialCoverflowHero() {
         <button
           type="button"
           onClick={handleScrollToAbuelitaKitchen}
-          className={`${MONO} mt-4 inline-flex items-center gap-2 rounded-xl border border-[#F0822D] bg-[#F0822D] px-6 py-2.5 text-xs font-bold text-[#2B2117] shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer`}
+          className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#F0822D] bg-[#F0822D] px-6 py-2.5 text-sm font-bold text-[#2B2117] shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-transform cursor-pointer"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           Volver a la cocina de la abuelita
         </button>
 
-        <div className={`${MONO} text-[10px] text-[#8A7860] tracking-widest uppercase mt-6`}>
+        <div className="text-xs text-[#8A7860] tracking-widest uppercase mt-6">
           OllaCercana · Conectando Cocinas Reales en el Barrio
         </div>
       </div>
@@ -1486,7 +1479,7 @@ export default function SpatialCoverflowHero() {
                     <div className="flex flex-col text-xs">
                       <span className="font-bold text-[#FAF3E7] text-sm">{expandedDish.cook}</span>
                       <span className="text-[#FAF3E7]/70 text-[11px]">{expandedDish.cookRole}</span>
-                      <span className="text-[#FAF3E7]/90 font-mono text-[11px] mt-0.5">🏢 {expandedDish.residentialComplex}</span>
+                      <span className="text-[#FAF3E7]/90 font-mono text-[11px] mt-0.5"><Building2 className="inline h-3 w-3" aria-hidden="true" /> {expandedDish.residentialComplex}</span>
                     </div>
                   </div>
 

@@ -6,6 +6,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import AnimatedKitchenBackground from "@/components/AnimatedKitchenBackground";
+import { getCommunityPortrait } from "@/lib/community-portraits";
 import { AlertCircle, Upload, HelpCircle, Home, CookingPot, Utensils } from "lucide-react";
 
 interface UserProfile {
@@ -133,6 +134,7 @@ export default function CuentaPage({ initialAuthMode = "login" }: { initialAuthM
       residentialComplex: "Torres del Norte - Apto 302",
       paymentMethods: ["Efectivo", "Nequi", "Llaves"],
       isLoggedIn: true,
+      avatar: getCommunityPortrait(loginId),
       isCocineraActive: true,
       dataConsentAccepted: true,
     };
@@ -194,6 +196,7 @@ export default function CuentaPage({ initialAuthMode = "login" }: { initialAuthM
       residentialComplex: "Conjunto Residencial El Rosal",
       paymentMethods: ["Efectivo", "Nequi"],
       isLoggedIn: true,
+      avatar: getCommunityPortrait(regEmail),
     };
 
     localStorage.setItem("ollacercana_user", JSON.stringify(newUser));
@@ -256,13 +259,13 @@ export default function CuentaPage({ initialAuthMode = "login" }: { initialAuthM
       </div>
 
       {/* ── CONTENEDOR PRINCIPAL (Solo formulario, alineado a la derecha pero con ajuste fino para encajar en el humo) ── */}
-      <div className="relative w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-end z-10 px-8 lg:pr-12 xl:pr-20 py-12 min-h-screen">
+      <div className="relative w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-end z-10 px-4 sm:px-8 lg:pr-12 xl:pr-20 py-8 sm:py-12 min-h-screen">
         
         {/* ── FORMULARIO PRINCIPAL ── */}
-        <div className="w-full md:w-1/2 lg:w-[450px] relative z-10 backdrop-blur-md bg-black/50 p-8 rounded-2xl border border-[#F0822D]/30 shadow-[0_0_50px_rgba(240,130,45,0.15)] animate-in fade-in slide-in-from-right-8 duration-1000">
+        <div className="w-full md:w-1/2 lg:w-[450px] relative z-10 backdrop-blur-md bg-black/50 p-5 sm:p-8 rounded-2xl border border-[#F0822D]/30 shadow-[0_0_50px_rgba(240,130,45,0.15)] animate-in fade-in slide-in-from-right-8 duration-1000">
           
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 sm:mb-6">
               {authMode === "login" ? "Entra a tu cocina" : "Crea tu cuenta"}
             </h1>
             <p className="text-white font-bold text-lg">
@@ -414,7 +417,7 @@ export default function CuentaPage({ initialAuthMode = "login" }: { initialAuthM
                />
              </div>
  
-             <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-4">
                <div className="space-y-1.5">
                  <label className="text-xs uppercase font-bold tracking-wider text-white">Contraseña *</label>
                  <input

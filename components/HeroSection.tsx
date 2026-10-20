@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { MapPin, ChefHat, UtensilsCrossed, ChevronDown, Sparkles, CircleHelp } from "lucide-react";
+import { MapPin, ChefHat, UtensilsCrossed, ChevronDown, Sparkles } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
 export default function HeroSection() {

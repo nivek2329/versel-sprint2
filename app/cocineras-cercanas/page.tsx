@@ -57,7 +57,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "dona-rosa",
     name: "Doña Rosa",
-    avatar: "/images/dona_rosa_mascot.jpg",
+    avatar: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
     rating: "4,9",
     reviews: 124,
     distanceMeters: 320,
@@ -79,7 +79,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "don-carlos",
     name: "Don Carlos",
-    avatar: "/images/abuelita_3d_mascot.jpg",
+    avatar: "/images/comunidad/vecino_1.jpg",
     rating: "4,8",
     reviews: 98,
     distanceMeters: 480,
@@ -101,7 +101,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "dona-marta",
     name: "Doña Marta",
-    avatar: "/images/dona_rosa_mascot.jpg",
+    avatar: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
     rating: "4,8",
     reviews: 89,
     distanceMeters: 740,
@@ -123,7 +123,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "dona-lucia",
     name: "Doña Lucía",
-    avatar: "/images/abuelita_3d_mascot.jpg",
+    avatar: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
     rating: "4,9",
     reviews: 67,
     distanceMeters: 890,
@@ -145,7 +145,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "don-luis",
     name: "Don Luis",
-    avatar: "/images/dona_rosa_mascot.jpg",
+    avatar: "/images/comunidad/vecino_4.jpg",
     rating: "4,9",
     reviews: 112,
     distanceMeters: 1120,
@@ -167,7 +167,7 @@ const COOKS_DATA: Cook[] = [
   {
     id: "maria-elena",
     name: "María Elena",
-    avatar: "/images/abuelita_3d_mascot.jpg",
+    avatar: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
     rating: "4,7",
     reviews: 74,
     distanceMeters: 1350,

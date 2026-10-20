@@ -160,7 +160,7 @@ export default function MenuPage() {
       formattedPrice: "$18.000",
       image: "/images/menu_ajiaco.jpg",
       cook: "Doña Rosa",
-      cookAvatar: "/images/dona_rosa_mascot.jpg",
+      cookAvatar: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
       rating: "4,9",
       reviews: "120",
       distance: "A 350 m",
@@ -175,7 +175,7 @@ export default function MenuPage() {
       formattedPrice: "$22.000",
       image: "/images/menu_cazuela.jpg",
       cook: "Don Carlos",
-      cookAvatar: "/images/abuelita_3d_mascot.jpg",
+      cookAvatar: "/images/comunidad/vecino_1.jpg",
       rating: "4,8",
       reviews: "95",
       distance: "A 600 m",
@@ -190,7 +190,7 @@ export default function MenuPage() {
       formattedPrice: "$17.000",
       image: "/images/dish_pollo_chalk.jpg",
       cook: "Doña Marta",
-      cookAvatar: "/images/dona_rosa_mascot.jpg",
+      cookAvatar: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
       rating: "4,8",
       reviews: "87",
       distance: "A 800 m",
@@ -205,7 +205,7 @@ export default function MenuPage() {
       formattedPrice: "$15.000",
       image: "/images/hero_plate_gourmet.jpg",
       cook: "María Elena",
-      cookAvatar: "/images/abuelita_3d_mascot.jpg",
+      cookAvatar: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
       rating: "4,7",
       reviews: "73",
       distance: "A 1,2 km",
@@ -220,7 +220,7 @@ export default function MenuPage() {
       formattedPrice: "$19.000",
       image: "/images/olla_dish_1.jpg",
       cook: "Don Luis",
-      cookAvatar: "/images/dona_rosa_mascot.jpg",
+      cookAvatar: "/images/comunidad/vecino_4.jpg",
       rating: "4,9",
       reviews: "101",
       distance: "A 1,1 km",
@@ -235,7 +235,7 @@ export default function MenuPage() {
       formattedPrice: "$6.000",
       image: "/images/menu_postre.jpg",
       cook: "Doña Lucía",
-      cookAvatar: "/images/abuelita_3d_mascot.jpg",
+      cookAvatar: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85",
       rating: "4,8",
       reviews: "64",
       distance: "A 900 m",
@@ -1029,7 +1029,7 @@ export default function MenuPage() {
                   >
                     <div className="w-7 h-7 rounded-full overflow-hidden relative border border-stone-300">
                       <Image
-                          src={currentUser.avatar || "/images/dona_rosa_mascot.jpg"}
+                          src={currentUser.avatar || "/images/comunidad/vecino_2.jpg"}
                           alt={currentUser.name}
                           fill
                           className="object-cover"
@@ -1041,10 +1041,11 @@ export default function MenuPage() {
               ) : (
                   <Link
                       href="/cuenta"
-                      className="flex items-center gap-1.5 rounded-full bg-[#C84B31] hover:bg-[#a83e29] px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-sm active:scale-95"
+                      aria-label="Iniciar sesión"
+                  className="flex items-center gap-1.5 rounded-full bg-[#C84B31] hover:bg-[#a83e29] px-2 sm:px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-sm active:scale-95"
                   >
                     <User className="w-3.5 h-3.5 text-white" />
-                    <span>Iniciar sesión</span>
+                    <span className="hidden min-[420px]:inline">Iniciar sesión</span>
                   </Link>
               )}
             </div>
@@ -1092,10 +1093,10 @@ export default function MenuPage() {
         </header>
 
         {/* ── CONTENIDO PRINCIPAL ── */}
-        <main className="relative z-10 mx-auto max-w-[1400px] space-y-5 px-4 pb-6 pt-4 md:px-8 md:pb-8 md:pt-[52px]">
+        <main className="relative z-10 mx-auto max-w-[1400px] space-y-4 px-3 pb-6 pt-3 sm:space-y-5 sm:px-4 sm:pt-4 md:px-8 md:pb-8 md:pt-[52px]">
           {/* HERO CHALKBOARD ROW */}
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            <div className="menu-paper lg:col-span-8 relative overflow-hidden border border-[#9b774f] bg-[#efe0c2] p-6 shadow-[0_12px_28px_rgba(46,27,13,.32),inset_0_0_28px_rgba(117,78,38,.16)] [clip-path:polygon(1%_1%,98%_0%,100%_3%,99%_97%,97%_100%,2%_99%,0%_96%,1%_4%)] md:p-8 flex flex-col justify-between min-h-[220px]">
+            <div className="menu-paper lg:col-span-8 relative overflow-hidden border border-[#9b774f] bg-[#efe0c2] p-4 shadow-[0_12px_28px_rgba(46,27,13,.32),inset_0_0_28px_rgba(117,78,38,.16)] [clip-path:polygon(1%_1%,98%_0%,100%_3%,99%_97%,97%_100%,2%_99%,0%_96%,1%_4%)] sm:p-6 md:p-8 flex flex-col justify-between min-h-[180px] sm:min-h-[220px]">
               <div
                   aria-hidden="true"
                   className="absolute -top-1 left-1/2 z-20 h-7 w-24 -translate-x-1/2 -rotate-2 border-x border-[#b99655]/70 bg-[#d6b776]/90 shadow-sm"
@@ -1130,7 +1131,7 @@ export default function MenuPage() {
                       </svg>
                     </div>
                     <div>
-                      <h1 className="font-['Caveat',cursive] text-4xl sm:text-5xl md:text-6xl font-bold text-[#2b2117] tracking-wide leading-none">
+                      <h1 className="font-['Caveat',cursive] text-3xl sm:text-5xl md:text-6xl font-bold text-[#2b2117] tracking-wide leading-none">
                         Hoy se come rico.
                       </h1>
                       <div className="w-48 h-1.5 bg-[#C84B31] rounded-full mt-1 rotate-[-1deg]" />
@@ -1158,7 +1159,7 @@ export default function MenuPage() {
               </div>
             </div>
 
-            <div className="menu-paper lg:col-span-4 relative overflow-hidden border border-[#9b774f] bg-[#efe0c2] p-6 shadow-[0_10px_22px_rgba(46,27,13,.28)] [clip-path:polygon(1%_1%,98%_0%,100%_3%,99%_97%,97%_100%,2%_99%,0%_96%,1%_4%)] flex flex-col justify-center text-center space-y-3 min-h-[180px]">
+            <div className="menu-paper lg:col-span-4 relative overflow-hidden border border-[#9b774f] bg-[#efe0c2] p-4 shadow-[0_10px_22px_rgba(46,27,13,.28)] [clip-path:polygon(1%_1%,98%_0%,100%_3%,99%_97%,97%_100%,2%_99%,0%_96%,1%_4%)] flex flex-col justify-center text-center space-y-2 sm:space-y-3 sm:p-6 min-h-[120px] sm:min-h-[180px]">
               <div
                   aria-hidden="true"
                   className="absolute -top-1 left-1/2 z-20 h-6 w-20 -translate-x-1/2 -rotate-2 border-x border-[#b99655]/70 bg-[#d6b776]/90 shadow-sm"
@@ -1167,7 +1168,7 @@ export default function MenuPage() {
                 <div className="w-3 h-3 rounded-full bg-[#b78a59] border-2 border-[#765638]" />
               </div>
 
-              <h2 className="font-['Caveat',cursive] text-3xl md:text-4xl font-bold text-[#2b2117] leading-tight">
+              <h2 className="font-['Caveat',cursive] text-2xl sm:text-3xl md:text-4xl font-bold text-[#2b2117] leading-tight">
                 La hora del almuerzo
               </h2>
               <p className="font-['Caveat',cursive] text-lg text-[#5b4a38]">Encuentra tu favorito cerca de casa. ♡</p>
@@ -1184,9 +1185,9 @@ export default function MenuPage() {
                     className="absolute -top-1 left-1/2 z-20 h-6 w-20 -translate-x-1/2 -rotate-2 border-x border-[#b99655]/70 bg-[#d6b776]/90 shadow-sm"
                 />
                 <div className="flex items-center justify-between border-b border-[#ae9066] pb-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <Flame className="w-5 h-5 text-[#F0822D]" />
-                    <h3 className="font-['Caveat',cursive] text-2xl font-bold text-[#493323]">Antojo del Día</h3>
+                    <h3 className="whitespace-nowrap font-['Caveat',cursive] text-2xl font-bold text-[#493323]">Antojo del Día</h3>
                     <span className="text-xs bg-[#dce4ce] text-[#52663d] border border-[#75865a]/50 px-2.5 py-0.5 rounded-full font-bold">
                     Platos de cocinas cercanas
                   </span>
@@ -1196,20 +1197,20 @@ export default function MenuPage() {
                 </span>
                 </div>
 
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none">
+                <div className="-mx-1 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto px-1 pb-2 scrollbar-none sm:mx-0 sm:gap-2.5 sm:px-0 sm:snap-none">
                   {[
-                    { name: "Doña Rosa", dish: "Ajiaco de la casa", dist: "350 m", rating: "4,9", img: "/images/dona_rosa_mascot.jpg" },
-                    { name: "Don Carlos", dish: "Bandeja casera", dist: "600 m", rating: "4,8", img: "/images/abuelita_3d_mascot.jpg" },
-                    { name: "Doña Marta", dish: "Pollo guisado", dist: "800 m", rating: "4,8", img: "/images/dona_rosa_mascot.jpg" },
-                    { name: "María Elena", dish: "Lentejas estofadas", dist: "1,2 km", rating: "4,7", img: "/images/abuelita_3d_mascot.jpg" },
-                    { name: "Don Luis", dish: "Sancocho de pollo", dist: "1,1 km", rating: "4,9", img: "/images/dona_rosa_mascot.jpg" },
-                    { name: "Doña Lucía", dish: "Arroz con leche", dist: "900 m", rating: "4,8", img: "/images/abuelita_3d_mascot.jpg" },
-                    { name: "Doña Carmen", dish: "Tamales tolimenses", dist: "450 m", rating: "4,9", img: "/images/dona_rosa_mascot.jpg" },
-                    { name: "Don Pedro", dish: "Sudado criollo", dist: "700 m", rating: "4,8", img: "/images/abuelita_3d_mascot.jpg" },
+                    { name: "Doña Rosa", dish: "Ajiaco de la casa", dist: "350 m", rating: "4,9", img: "https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Don Carlos", dish: "Bandeja casera", dist: "600 m", rating: "4,8", img: "/images/comunidad/vecino_1.jpg" },
+                    { name: "Doña Marta", dish: "Pollo guisado", dist: "800 m", rating: "4,8", img: "https://images.unsplash.com/photo-1635368892977-0100146f12bb?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "María Elena", dish: "Lentejas estofadas", dist: "1,2 km", rating: "4,7", img: "https://images.unsplash.com/photo-1756061010801-55a394340f41?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Don Luis", dish: "Sancocho de pollo", dist: "1,1 km", rating: "4,9", img: "/images/comunidad/vecino_4.jpg" },
+                    { name: "Doña Lucía", dish: "Arroz con leche", dist: "900 m", rating: "4,8", img: "https://images.unsplash.com/photo-1489089905289-5c91ae6e2544?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Doña Carmen", dish: "Tamales tolimenses", dist: "450 m", rating: "4,9", img: "https://images.unsplash.com/photo-1759679124833-83c668839eaa?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
+                    { name: "Don Pedro", dish: "Sudado criollo", dist: "700 m", rating: "4,8", img: "https://images.unsplash.com/photo-1556908153-a685b0352d59?auto=format&fit=crop&crop=faces&w=480&h=480&q=85" },
                   ].map((cook, idx) => (
                       <div
                           key={idx}
-                          className="menu-paper menu-subpaper relative min-w-[170px] max-w-[180px] shrink-0 bg-[#f5e9d2] border border-[#c4a77d] hover:border-[#C84B31]/70 p-2.5 shadow-[0_3px_6px_rgba(73,47,25,.14)] flex flex-col justify-between transition-all group"
+                          className="menu-paper menu-subpaper relative min-w-[min(78vw,280px)] max-w-[280px] shrink-0 snap-start bg-[#f5e9d2] border border-[#c4a77d] hover:border-[#C84B31]/70 p-3 shadow-[0_3px_6px_rgba(73,47,25,.14)] flex flex-col justify-between transition-all group sm:min-w-[170px] sm:max-w-[180px] sm:snap-align-none sm:p-2.5"
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">

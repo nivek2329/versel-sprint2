@@ -20,21 +20,21 @@ export default function BrandLogo({
     sm: "text-xl sm:text-2xl",
     md: "text-3xl sm:text-4xl",
     lg: "text-4xl sm:text-5xl md:text-6xl",
-    xl: "text-5xl sm:text-7xl md:text-8xl lg:text-9xl",
+    xl: "text-4xl min-[380px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl",
   };
 
   const taglineSizes = {
     sm: "text-[10px] sm:text-xs gap-1.5 mt-0.5",
     md: "text-xs sm:text-sm gap-2 mt-1",
     lg: "text-xs sm:text-base gap-2.5 mt-1.5",
-    xl: "text-sm sm:text-xl lg:text-2xl gap-3 mt-2 md:mt-3",
+    xl: "text-xs min-[380px]:text-sm sm:text-xl lg:text-2xl gap-2 min-[380px]:gap-3 mt-2 md:mt-3",
   };
 
   const dashSizes = {
     sm: "w-3 h-[2px]",
     md: "w-4 h-[2.5px]",
     lg: "w-5 sm:w-6 h-[3px]",
-    xl: "w-6 sm:w-10 h-[3px] md:h-[4px]",
+    xl: "w-3 min-[380px]:w-6 sm:w-10 h-[3px] md:h-[4px]",
   };
 
   return (

@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { getCommunityPortrait } from "@/lib/community-portraits";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { LogOut, UserCheck, ShoppingBag, ChefHat, Bell, ShieldCheck, UtensilsCrossed, Settings, Menu, X, ChevronRight } from "lucide-react";
@@ -18,6 +20,7 @@ interface AccountNavUser {
   name: string;
   email: string;
   role: "comprador" | "cocinera" | "admin";
+  avatar?: string;
 }
 
 interface AccountNavProps {
@@ -126,9 +129,9 @@ export default function AccountNav({ user, current, unreadCount = 0 }: AccountNa
         <button type="button" onClick={() => setMenuOpen(true)} aria-haspopup="dialog" aria-expanded={menuOpen} aria-label="Abrir navegación de cuenta" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e5c18c]/60 bg-[#f3e6cb] text-[#493323] shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5d18c]">
           <Menu className="h-5 w-5" />
         </button>
-        <h2 className="pointer-events-none absolute left-1/2 max-w-[65%] -translate-x-1/2 truncate font-['Caveat',cursive] text-2xl font-bold text-[#fff0d2] sm:text-3xl">{currentItem?.label ?? "Mi cuenta"}</h2>
-        <div className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#e5c18c] bg-[#f3e6cb] font-['Caveat',cursive] text-xl font-bold text-[#a84029] shadow-inner" aria-label={`Sesión de ${user.name}`} title={user.name}>
-          {user.name.charAt(0).toUpperCase()}
+        <h2 className="pointer-events-none min-w-0 flex-1 truncate px-1 text-center font-['Caveat',cursive] text-lg font-bold text-[#fff0d2] min-[380px]:text-xl sm:text-3xl">{currentItem?.label ?? "Mi cuenta"}</h2>
+        <div className="ml-auto hidden h-10 w-10 shrink-0 overflow-hidden rounded-full min-[380px]:block border-2 border-[#e5c18c] bg-[#f3e6cb] shadow-inner" aria-label={`Sesión de ${user.name}`} title={user.name}>
+          <Image src={user.avatar || getCommunityPortrait(user.email)} alt={`Foto de ${user.name}`} width={40} height={40} className="h-full w-full object-cover" />
         </div>
       </div>
 
@@ -138,7 +141,7 @@ export default function AccountNav({ user, current, unreadCount = 0 }: AccountNa
           <aside role="dialog" aria-modal="true" aria-labelledby="account-menu-title" className="relative flex h-full w-[min(86vw,340px)] flex-col border-r-[7px] border-[#57351f] bg-[#f3e6cb] text-[#34251a] shadow-[18px_0_45px_rgba(0,0,0,.35)]">
             <div className="flex items-center justify-between border-b-2 border-[#c7a779] bg-[linear-gradient(115deg,#9a6032,#75431f_45%,#a66b38)] px-5 py-5 text-[#fff0d2]">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#e5c18c] bg-[#f3e6cb] font-['Caveat',cursive] text-xl font-bold text-[#a84029]">{user.name.charAt(0).toUpperCase()}</span>
+                <span className="h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#e5c18c] bg-[#f3e6cb]"><Image src={user.avatar || getCommunityPortrait(user.email)} alt={`Foto de ${user.name}`} width={44} height={44} className="h-full w-full object-cover" /></span>
                 <div className="min-w-0">
                   <h2 id="account-menu-title" className="truncate font-['Caveat',cursive] text-2xl font-bold">{user.name}</h2>
                   <p className="truncate text-xs text-[#f3dfbf]">{user.role === "comprador" ? "Comprador" : user.role === "cocinera" ? "Cocinera" : "Administración"}</p>

@@ -89,6 +89,7 @@ function getActionRequest(message: string): ActionRequest | null | "missing-dish
 
 export default function AbuelitaHelpChat() {
   const pathname = usePathname();
+  const isAuthPage = pathname === "/login" || pathname === "/cuenta" || pathname === "/cuenta/registro";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -158,7 +159,7 @@ export default function AbuelitaHelpChat() {
   };
 
   return (
-    <div data-theme-page className="fixed bottom-4 right-4 z-[45] font-['Outfit',sans-serif]">
+    <div data-theme-page className={`${isAuthPage ? "relative z-[45] ml-auto mr-4 mt-3 mb-4 w-fit min-[640px]:fixed min-[640px]:bottom-6 min-[640px]:right-6 min-[640px]:mr-0 min-[640px]:mt-0 min-[640px]:mb-0" : "fixed bottom-4 right-4 z-[45]"} font-['Outfit',sans-serif]`}>
       {open && <section aria-label="Chat de ayuda de la abuelita" className="mb-3 flex h-[min(74vh,620px)] w-[min(92vw,390px)] flex-col overflow-hidden rounded-[1.5rem] border-2 border-[#8b6844] bg-[#f4e7ce] text-[#35251a] shadow-[0_20px_70px_rgba(0,0,0,.5)]">
         <header className="flex items-center gap-3 border-b border-[#bda078] bg-[#e8d1a3] px-4 py-3">
           <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#af7448] bg-[#fff7e9]"><Image src="/images/dona_rosa_mascot.jpg" alt="Abuelita de OllaCercana" fill sizes="44px" className="object-cover" /></div>
@@ -185,8 +186,8 @@ export default function AbuelitaHelpChat() {
         <p className="bg-[#ead9ba] px-4 pb-2 text-[10px] leading-relaxed text-[#80694d]">Soy una ayuda automática de esta demostración; verifica siempre el pago y la entrega con la cocinera.</p>
       </section>}
 
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={open ? "Cerrar ayuda" : "Abrir ayuda de la abuelita"} className="ml-auto flex h-14 items-center gap-2 rounded-full border-2 border-[#e1bc76] bg-[#c84b31] px-4 text-white shadow-[0_8px_30px_rgba(0,0,0,.35)] transition hover:-translate-y-0.5 hover:bg-[#a83e29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-        {open ? <X className="h-5 w-5" /> : <><div className="relative h-9 w-9 overflow-hidden rounded-full border border-white/70 bg-[#fff7e9]"><Image src="/images/dona_rosa_mascot.jpg" alt="" fill sizes="36px" className="object-cover" /></div><span className="font-['Caveat',cursive] text-xl font-bold">¿Te ayudo?</span><MessageCircle className="h-4 w-4" /></>}
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={open ? "Cerrar ayuda" : "Abrir ayuda de la abuelita"} className="ml-auto flex h-12 w-12 items-center justify-center gap-2 rounded-full border-2 border-[#e1bc76] bg-[#c84b31] p-1 text-white shadow-[0_8px_30px_rgba(0,0,0,.35)] transition hover:-translate-y-0.5 hover:bg-[#a83e29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:h-14 sm:w-auto sm:justify-start sm:px-4">
+        {open ? <X className="h-5 w-5" /> : <><div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-white/70 bg-[#fff7e9]"><Image src="/images/dona_rosa_mascot.jpg" alt="" fill sizes="36px" className="object-cover" /></div><span className="hidden font-['Caveat',cursive] text-xl font-bold sm:inline">¿Te ayudo?</span><MessageCircle className="hidden h-4 w-4 sm:block" /></>}
       </button>
     </div>
   );

@@ -138,7 +138,7 @@ export default function VecinoFielPage() {
       )}
 
       {/* ── BARRA SUPERIOR (Cálida y armónica con OllaCercana) ── */}
-      <header className="sticky top-0 z-40 bg-[#FAF3E7]/95 backdrop-blur-md border-b border-[#E6D4B8] px-4 sm:px-8 py-3 shadow-xs">
+      <header className="sticky top-0 z-40 bg-[#FAF3E7]/95 backdrop-blur-md border-b border-[#E6D4B8] px-2 sm:px-8 py-3 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="transition-transform hover:scale-105">
@@ -149,13 +149,14 @@ export default function VecinoFielPage() {
             </span>
           </div>
 
-          <nav className="flex items-center gap-2 sm:gap-4">
+          <nav className="flex items-center gap-1.5 sm:gap-4">
             <Link
               href="/menu"
-              className="flex items-center gap-1.5 text-xs font-bold text-[#5B4A38] hover:text-[#F0822D] bg-[#EFE0C2] hover:bg-[#E8D1A3] px-3.5 py-2 rounded-full border border-[#D9B68C] transition-colors"
+              aria-label="Ver Menú"
+              className="flex items-center gap-1.5 text-xs font-bold text-[#5B4A38] hover:text-[#F0822D] bg-[#EFE0C2] hover:bg-[#E8D1A3] px-2 sm:px-3.5 py-2 rounded-full border border-[#D9B68C] transition-colors"
             >
               <ChevronLeft className="w-4 h-4 text-[#F0822D]" />
-              <span>Ver Menú</span>
+              <span className="hidden min-[420px]:inline">Ver Menú</span>
             </Link>
             <Link
               href="/cocineras-cercanas"
@@ -165,10 +166,11 @@ export default function VecinoFielPage() {
             </Link>
             <Link
               href="/cuenta/perfil"
-              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#F0822D] hover:bg-[#D97224] px-4 py-2 rounded-full shadow-sm transition-all"
+              aria-label="Mi Perfil"
+              className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#F0822D] hover:bg-[#D97224] px-2 sm:px-4 py-2 rounded-full shadow-sm transition-all"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Mi Perfil</span>
+              <span className="hidden min-[420px]:inline">Mi Perfil</span>
             </Link>
           </nav>
         </div>
@@ -322,8 +324,8 @@ export default function VecinoFielPage() {
                 {/* Fotografía de Doña Rosa cocinando */}
                 <div className="relative w-full aspect-[4/5] rounded-xs overflow-hidden bg-[#FAF3E7] border border-[#E6D4B8]">
                   <Image
-                    src="/images/dona_rosa_mascot.jpg"
-                    alt="Doña Rosa & la sazón del barrio"
+                    src="https://images.unsplash.com/photo-1556911073-a517e752729c?auto=format&fit=crop&crop=faces&w=900&h=1100&q=90"
+                    alt="Doña Rosa cocinando en su cocina"
                     fill
                     sizes="340px"
                     className="object-cover object-top"
